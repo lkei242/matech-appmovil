@@ -2,52 +2,40 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { useAuth } from '../auth/AuthContext';
-import { API_BASE_URL } from '../api';
-
-const ETIQUETAS_ROL = {
-  alumno: 'Alumno',
-  docente: 'Docente',
-  padre: 'Tutor (Padre/Madre)',
-  preceptor: 'Preceptor',
-  directivo: 'Directivo',
-  administrativo: 'Personal Administrativo',
-};
+import { ETIQUETAS_ROL, modulosPara } from '../navigation/modulos';
+import { EstadoVacio } from '../components/Estados';
 
 export default function DashboardScreen({ navigation }) {
   const { sesion, logout } = useAuth();
   if (!sesion) return null;
 
   const { rol, usuario, persona } = sesion;
-  const nombre =
-    persona && persona.nombre
-      ? `${persona.nombre} ${persona.apellido}`
-      : usuario;
+  const nombre = persona && persona.nombre ? `${persona.nombre} ${persona.apellido}` : usuario;
+  const modulos = modulosPara(rol);
 
   return (
     <View style={styles.pantalla}>
       <View style={styles.header}>
         <Text style={styles.saludo}>Hola, {nombre}</Text>
-        <Text style={styles.rol}>
-          {ETIQUETAS_ROL[rol] || rol} · @{usuario}
-        </Text>
+        <Text style={styles.rol}>{ETIQUETAS_ROL[rol] || rol} · @{usuario}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.contenido}>
-        <View style={styles.tarjeta}>
-          <Text style={styles.titulo}>Dashboard de {ETIQUETAS_ROL[rol] || rol}</Text>
-          <Text style={styles.descripcion}>
-            Este módulo está en desarrollo. Acá verás las funcionalidades de tu
-            rol (materias, noticias, comunicados, etc.).
-          </Text>
-        </View>
-
-        <View style={styles.tarjeta}>
-          <Text style={styles.tituloPeq}>Datos de la sesión</Text>
-          <Text style={styles.dato}>Rol: {rol}</Text>
-          <Text style={styles.dato}>Usuario: {usuario}</Text>
-          {sesion.correo ? <Text style={styles.dato}>Correo: {sesion.correo}</Text> : null}
-          <Text style={styles.dato}>API: {API_BASE_URL}</Text>
-        </View>
+        {modulos.length === 0 ? (
+          <EstadoVacio mensaje="Todavía no hay funciones móviles para tu rol." />
+        ) : (
+          modulos.map((modulo) => (
+            <TouchableOpacity
+              key={modulo.id}
+              style={styles.tarjeta}
+              onPress={() => navigation.navigate(modulo.pantalla)}
+              accessibilityRole="button"
+            >
+              <Text style={styles.titulo}>{modulo.titulo}</Text>
+              <Text style={styles.descripcion}>{modulo.descripcion}</Text>
+            </TouchableOpacity>
+          ))
+        )}
       </ScrollView>
 
       <View style={styles.pie}>
@@ -82,37 +70,26 @@ const styles = StyleSheet.create({
   },
   contenido: {
     padding: 16,
+    gap: 12,
   },
   tarjeta: {
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 12,
     shadowColor: '#000',
     shadowOpacity: 0.06,
     shadowRadius: 6,
     elevation: 2,
   },
   titulo: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: 'bold',
     color: '#0B3D63',
   },
-  tituloPeq: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#0B3D63',
-    marginBottom: 8,
-  },
   descripcion: {
     color: '#4B5563',
-    marginTop: 8,
+    marginTop: 4,
     lineHeight: 20,
-  },
-  dato: {
-    color: '#4B5563',
-    marginTop: 2,
-    fontSize: 14,
   },
   pie: {
     padding: 16,
