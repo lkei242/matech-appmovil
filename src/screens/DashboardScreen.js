@@ -23,6 +23,8 @@ export default function DashboardScreen({ navigation }) {
       ? `${persona.nombre} ${persona.apellido}`
       : usuario;
 
+  const puedeGestionarServicios = ['padre', 'alumno', 'administrativo', 'directivo'].includes(rol);
+
   return (
     <View style={styles.pantalla}>
       <View style={styles.header}>
@@ -33,20 +35,92 @@ export default function DashboardScreen({ navigation }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.contenido}>
-        <View style={styles.tarjeta}>
-          <Text style={styles.titulo}>Dashboard de {ETIQUETAS_ROL[rol] || rol}</Text>
-          <Text style={styles.descripcion}>
-            Este módulo está en desarrollo. Acá verás las funcionalidades de tu
-            rol (materias, noticias, comunicados, etc.).
+        {/* Módulos implementados de Germán */}
+        <Text style={styles.seccionEncabezado}>Módulos Disponibles</Text>
+
+        {puedeGestionarServicios && (
+          <TouchableOpacity
+            style={styles.moduloTarjeta}
+            onPress={() => navigation.navigate('Servicios')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.moduloIconoContenedor}>
+              <Text style={styles.moduloIcono}>🏃</Text>
+            </View>
+            <View style={styles.moduloInfo}>
+              <View style={styles.moduloFilaTitulo}>
+                <Text style={styles.moduloTitulo}>Servicios Escolares</Text>
+                <View style={styles.rfBadge}>
+                  <Text style={styles.rfBadgeTexto}>RF-M16</Text>
+                </View>
+              </View>
+              <Text style={styles.moduloDesc}>
+                Inscripción a deportes (máx. 2), asignación de transporte (4 recorridos) y comedor escolar.
+              </Text>
+            </View>
+            <Text style={styles.moduloFlecha}>›</Text>
+          </TouchableOpacity>
+        )}
+
+        <TouchableOpacity
+          style={styles.moduloTarjeta}
+          onPress={() => navigation.navigate('Perfil')}
+          activeOpacity={0.7}
+        >
+          <View style={[styles.moduloIconoContenedor, { backgroundColor: '#E8F2FF' }]}>
+            <Text style={styles.moduloIcono}>👤</Text>
+          </View>
+          <View style={styles.moduloInfo}>
+            <View style={styles.moduloFilaTitulo}>
+              <Text style={styles.moduloTitulo}>Mi Perfil</Text>
+              <View style={styles.rfBadge}>
+                <Text style={styles.rfBadgeTexto}>RF-M18</Text>
+              </View>
+            </View>
+            <Text style={styles.moduloDesc}>
+              Consulta y actualización de correo electrónico y teléfono de contacto institucional.
+            </Text>
+          </View>
+          <Text style={styles.moduloFlecha}>›</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.moduloTarjeta}
+          onPress={() => navigation.navigate('Offline')}
+          activeOpacity={0.7}
+        >
+          <View style={[styles.moduloIconoContenedor, { backgroundColor: '#EDF6E7' }]}>
+            <Text style={styles.moduloIcono}>📶</Text>
+          </View>
+          <View style={styles.moduloInfo}>
+            <View style={styles.moduloFilaTitulo}>
+              <Text style={styles.moduloTitulo}>Consulta Offline</Text>
+              <View style={[styles.rfBadge, { backgroundColor: '#EDF6E7' }]}>
+                <Text style={[styles.rfBadgeTexto, { color: '#4C7A2E' }]}>RF-M17</Text>
+              </View>
+            </View>
+            <Text style={styles.moduloDesc}>
+              Horarios, recorridos y comunicados guardados localmente para acceder sin conexión a internet.
+            </Text>
+          </View>
+          <Text style={styles.moduloFlecha}>›</Text>
+        </TouchableOpacity>
+
+        {/* Tarjeta de estado de módulos de pagos (Luka) */}
+        <View style={styles.tarjetaPendiente}>
+          <Text style={styles.tarjetaPendienteTitulo}>💳 Pagos y Cuotas (RF-M03 a RF-M07)</Text>
+          <Text style={styles.tarjetaPendienteDesc}>
+            Módulo asignado a Luka (en desarrollo). Permitirá consultar cuotas, registrar pagos por transferencia y subir comprobantes.
           </Text>
         </View>
 
+        {/* Datos técnicos de la sesión */}
         <View style={styles.tarjeta}>
-          <Text style={styles.tituloPeq}>Datos de la sesión</Text>
-          <Text style={styles.dato}>Rol: {rol}</Text>
-          <Text style={styles.dato}>Usuario: {usuario}</Text>
-          {sesion.correo ? <Text style={styles.dato}>Correo: {sesion.correo}</Text> : null}
-          <Text style={styles.dato}>API: {API_BASE_URL}</Text>
+          <Text style={styles.tituloPeq}>Datos de la sesión activa</Text>
+          <Text style={styles.dato}>Rol institucional: <Text style={styles.datoBold}>{rol}</Text></Text>
+          <Text style={styles.dato}>Usuario: <Text style={styles.datoBold}>{usuario}</Text></Text>
+          {sesion.correo ? <Text style={styles.dato}>Correo: <Text style={styles.datoBold}>{sesion.correo}</Text></Text> : null}
+          <Text style={styles.dato}>Servidor API: <Text style={styles.datoCode}>{API_BASE_URL}</Text></Text>
         </View>
       </ScrollView>
 
@@ -62,18 +136,18 @@ export default function DashboardScreen({ navigation }) {
 const styles = StyleSheet.create({
   pantalla: {
     flex: 1,
-    backgroundColor: '#F3F6FA',
+    backgroundColor: '#F6F9FC',
   },
   header: {
-    backgroundColor: '#0B3D63',
+    backgroundColor: '#18324B',
     paddingHorizontal: 20,
     paddingTop: 54,
-    paddingBottom: 18,
+    paddingBottom: 20,
   },
   saludo: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   rol: {
     color: '#BFDBFE',
@@ -82,50 +156,140 @@ const styles = StyleSheet.create({
   },
   contenido: {
     padding: 16,
+    paddingBottom: 20,
   },
-  tarjeta: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+  seccionEncabezado: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#18324B',
+    marginBottom: 12,
+  },
+  moduloTarjeta: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#DCE6EF',
+    shadowColor: '#18324B',
+    shadowOpacity: 0.04,
     shadowRadius: 6,
     elevation: 2,
   },
-  titulo: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0B3D63',
+  moduloIconoContenedor: {
+    width: 46,
+    height: 46,
+    borderRadius: 12,
+    backgroundColor: '#E8F2FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  moduloIcono: {
+    fontSize: 22,
+  },
+  moduloInfo: {
+    flex: 1,
+  },
+  moduloFilaTitulo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingRight: 6,
+  },
+  moduloTitulo: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#18324B',
+  },
+  rfBadge: {
+    backgroundColor: '#E8F2FF',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  rfBadgeTexto: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#1D66C2',
+  },
+  moduloDesc: {
+    fontSize: 13,
+    color: '#62758A',
+    marginTop: 3,
+    lineHeight: 18,
+  },
+  moduloFlecha: {
+    fontSize: 22,
+    color: '#62758A',
+    marginLeft: 6,
+  },
+  tarjetaPendiente: {
+    backgroundColor: '#F6F9FC',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#DCE6EF',
+    borderStyle: 'dashed',
+  },
+  tarjetaPendienteTitulo: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#62758A',
+  },
+  tarjetaPendienteDesc: {
+    fontSize: 12,
+    color: '#62758A',
+    marginTop: 4,
+    lineHeight: 16,
+  },
+  tarjeta: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#DCE6EF',
   },
   tituloPeq: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#0B3D63',
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#18324B',
     marginBottom: 8,
   },
-  descripcion: {
-    color: '#4B5563',
-    marginTop: 8,
-    lineHeight: 20,
-  },
   dato: {
-    color: '#4B5563',
-    marginTop: 2,
-    fontSize: 14,
+    color: '#344C62',
+    marginTop: 4,
+    fontSize: 13,
+  },
+  datoBold: {
+    fontWeight: '700',
+    color: '#18324B',
+  },
+  datoCode: {
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+    fontSize: 12,
+    color: '#1D66C2',
   },
   pie: {
     padding: 16,
+    paddingBottom: 24,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#DCE6EF',
   },
   boton: {
-    backgroundColor: '#B91C1C',
-    borderRadius: 8,
-    padding: 14,
+    backgroundColor: '#B91D6A',
+    borderRadius: 10,
+    paddingVertical: 14,
     alignItems: 'center',
   },
   botonTexto: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });

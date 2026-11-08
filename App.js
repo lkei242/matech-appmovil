@@ -7,6 +7,9 @@ import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from './src/auth/AuthContext';
 import LoginScreen from './src/screens/LoginScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
+import ServiciosScreen from './src/features/servicios/ServiciosScreen';
+import PerfilScreen from './src/features/perfil/PerfilScreen';
+import OfflineScreen from './src/features/offline/OfflineScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,7 +19,7 @@ function Pantallas() {
   if (cargando) {
     return (
       <View style={styles.cargando}>
-        <ActivityIndicator size="large" color="#0B3D63" />
+        <ActivityIndicator size="large" color="#1D66C2" />
       </View>
     );
   }
@@ -25,7 +28,12 @@ function Pantallas() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {sesion ? (
-          <Stack.Screen name="Dashboard" component={DashboardScreen} />
+          <>
+            <Stack.Screen name="Dashboard" component={DashboardScreen} />
+            <Stack.Screen name="Servicios" component={ServiciosScreen} />
+            <Stack.Screen name="Perfil" component={PerfilScreen} />
+            <Stack.Screen name="Offline" component={OfflineScreen} />
+          </>
         ) : (
           <Stack.Screen name="Login" component={LoginScreen} />
         )}
@@ -46,7 +54,7 @@ export default function App() {
 const styles = StyleSheet.create({
   cargando: {
     flex: 1,
-    backgroundColor: '#E6F4FE',
+    backgroundColor: '#F6F9FC',
     alignItems: 'center',
     justifyContent: 'center',
   },
