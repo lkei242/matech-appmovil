@@ -22,10 +22,12 @@ export function fijarSesion(sesion) {
 }
 
 async function enviar(ruta, opciones, token) {
+  // Solo los cuerpos JSON llevan Content-Type; los FormData (archivos) lo arman fetch solo.
+  const esJson = typeof (opciones && opciones.body) === 'string';
   const resp = await fetch(`${API_BASE_URL}${ruta}`, {
     ...opciones,
     headers: {
-      'Content-Type': 'application/json',
+      ...(esJson ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(opciones && opciones.headers),
     },
