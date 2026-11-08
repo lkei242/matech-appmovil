@@ -31,19 +31,59 @@ export const API_BASE_URL = DETECTED_URL || Platform.select({
 });
 
 async function peticion(ruta, opciones) {
-  const resp = await fetch(`${API_BASE_URL}${ruta}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...opciones,
-  });
-
-  let datos = null;
   try {
-    datos = await resp.json();
-  } catch {
-    datos = null;
+    const resp = await fetch(`${API_BASE_URL}${ruta}`, {
+      headers: { 'Content-Type': 'application/json' },
+      ...opciones,
+    });
+
+    let datos = null;
+    try {
+      datos = await resp.json();
+    } catch {
+      datos = null;
+    }
+
+    return { ok: resp.ok, status: resp.status, datos };
+  } catch (err) {
+    return {
+      ok: false,
+      status: 0,
+      datos: { error: 'No se pudo conectar con el servidor. Verifique su red local o conexión a internet.' },
+    };
+  }
+}
+
+export async function apiAutenticada(ruta, opciones = {}, token = null) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(opciones.headers || {}),
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
-  return { ok: resp.ok, status: resp.status, datos };
+  try {
+    const resp = await fetch(`${API_BASE_URL}${ruta}`, {
+      ...opciones,
+      headers,
+    });
+
+    let datos = null;
+    try {
+      datos = await resp.json();
+    } catch {
+      datos = null;
+    }
+
+    return { ok: resp.ok, status: resp.status, datos };
+  } catch (err) {
+    return {
+      ok: false,
+      status: 0,
+      datos: { error: 'No se pudo conectar con el servidor. Verifique la conexión a la API.' },
+    };
+  }
 }
 
 export async function apiLogin(usuario, password) {

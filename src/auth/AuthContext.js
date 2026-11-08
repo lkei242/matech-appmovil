@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { apiLogin, apiLogout } from '../api';
 import { configurarCliente, fijarSesion } from '../api/cliente';
+import { limpiarCopiaOffline } from '../features/offline/offlineStorage';
 
 const CLAVE_SESION = 'matech_sesion';
 
@@ -73,6 +74,11 @@ export function AuthProvider({ children }) {
     if (sesion) {
       try {
         await apiLogout(sesion.refresh);
+      } catch {}
+      try {
+        if (sesion.usuario) {
+          await limpiarCopiaOffline(sesion.usuario);
+        }
       } catch {}
       await AsyncStorage.removeItem(CLAVE_SESION);
     }

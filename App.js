@@ -11,11 +11,15 @@ import CuotasScreen from './src/features/cuotas/CuotasScreen';
 import PagarScreen from './src/features/pagos/PagarScreen';
 import ComprobanteScreen from './src/features/pagos/ComprobanteScreen';
 import FacturasScreen from './src/features/facturas/FacturasScreen';
+import ServiciosScreen from './src/features/servicios/ServiciosScreen';
+import PerfilScreen from './src/features/perfil/PerfilScreen';
+import OfflineScreen from './src/features/offline/OfflineScreen';
 
 const Stack = createNativeStackNavigator();
 
-// Cada pantalla de módulo se registra acá. Qué ve cada rol se decide en src/navigation/modulos.js.
-const PANTALLAS_MODULOS = [
+// Pantallas de pagos: usan la barra de título del navegador.
+// Qué módulos ve cada rol se decide en src/navigation/modulos.js.
+const PANTALLAS_PAGOS = [
   { name: 'Cuotas', component: CuotasScreen, title: 'Cuotas y deuda' },
   { name: 'Pagar', component: PagarScreen, title: 'Pagar' },
   { name: 'Comprobante', component: ComprobanteScreen, title: 'Cargar comprobante' },
@@ -28,7 +32,7 @@ function Pantallas() {
   if (cargando) {
     return (
       <View style={styles.cargando}>
-        <ActivityIndicator size="large" color="#0B3D63" />
+        <ActivityIndicator size="large" color="#1D66C2" />
       </View>
     );
   }
@@ -39,14 +43,17 @@ function Pantallas() {
         {sesion ? (
           <>
             <Stack.Screen name="Dashboard" component={DashboardScreen} />
-            {PANTALLAS_MODULOS.map((modulo) => (
+            {PANTALLAS_PAGOS.map((pantalla) => (
               <Stack.Screen
-                key={modulo.name}
-                name={modulo.name}
-                component={modulo.component}
-                options={{ headerShown: true, title: modulo.title, headerTintColor: '#0B3D63' }}
+                key={pantalla.name}
+                name={pantalla.name}
+                component={pantalla.component}
+                options={{ headerShown: true, title: pantalla.title, headerTintColor: '#18324B' }}
               />
             ))}
+            <Stack.Screen name="Servicios" component={ServiciosScreen} />
+            <Stack.Screen name="Perfil" component={PerfilScreen} />
+            <Stack.Screen name="Offline" component={OfflineScreen} />
           </>
         ) : (
           <Stack.Screen name="Login" component={LoginScreen} />
@@ -68,7 +75,7 @@ export default function App() {
 const styles = StyleSheet.create({
   cargando: {
     flex: 1,
-    backgroundColor: '#E6F4FE',
+    backgroundColor: '#F6F9FC',
     alignItems: 'center',
     justifyContent: 'center',
   },
