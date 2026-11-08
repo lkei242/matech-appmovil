@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { apiLogin, apiLogout } from '../api';
+import { configurarCliente, fijarSesion } from '../api/cliente';
 
 const CLAVE_SESION = 'matech_sesion';
 
@@ -15,13 +16,34 @@ export function AuthProvider({ children }) {
     (async () => {
       try {
         const guardado = await AsyncStorage.getItem(CLAVE_SESION);
-        if (guardado) setSesion(JSON.parse(guardado));
+        if (guardado) {
+          const previa = JSON.parse(guardado);
+          fijarSesion(previa);
+          setSesion(previa);
+        }
       } catch {
         setSesion(null);
       } finally {
         setCargando(false);
       }
     })();
+  }, []);
+
+  // Cuando el cliente HTTP renueva el access token, guardamos la sesión nueva.
+  // Si la renovación falla, cerramos la sesión sin esperar a que el usuario lo note.
+  useEffect(() => {
+    configurarCliente({
+      onRenovada: async (renovada) => {
+        fijarSesion(renovada);
+        setSesion(renovada);
+        await AsyncStorage.setItem(CLAVE_SESION, JSON.stringify(renovada));
+      },
+      onExpirada: async () => {
+        fijarSesion(null);
+        await AsyncStorage.removeItem(CLAVE_SESION);
+        setSesion(null);
+      },
+    });
   }, []);
 
   async function login(usuario, password) {
@@ -41,6 +63,7 @@ export function AuthProvider({ children }) {
       dashboardUrl: resp.datos.dashboard_url,
       persona: resp.datos.persona,
     };
+    fijarSesion(nueva);
     setSesion(nueva);
     await AsyncStorage.setItem(CLAVE_SESION, JSON.stringify(nueva));
     return nueva;
@@ -53,6 +76,7 @@ export function AuthProvider({ children }) {
       } catch {}
       await AsyncStorage.removeItem(CLAVE_SESION);
     }
+    fijarSesion(null);
     setSesion(null);
   }
 
