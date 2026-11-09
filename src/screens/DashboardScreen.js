@@ -42,12 +42,7 @@ export default function DashboardScreen({ navigation }) {
               <Text style={styles.moduloIcono}>{modulo.icono}</Text>
             </View>
             <View style={styles.moduloInfo}>
-              <View style={styles.moduloFilaTitulo}>
-                <Text style={styles.moduloTitulo}>{modulo.titulo}</Text>
-                <View style={[styles.rfBadge, { backgroundColor: modulo.fondo }]}>
-                  <Text style={[styles.rfBadgeTexto, { color: modulo.colorTexto }]}>{modulo.rf}</Text>
-                </View>
-              </View>
+              <Text style={styles.moduloTitulo}>{modulo.titulo}</Text>
               <Text style={styles.moduloDesc}>{modulo.descripcion}</Text>
             </View>
             <Text style={styles.moduloFlecha}>›</Text>
@@ -79,50 +74,54 @@ const styles = StyleSheet.create({
     backgroundColor: '#F6F9FC',
   },
   header: {
-    backgroundColor: '#18324B',
+    backgroundColor: '#0B3D63',
+    paddingTop: 56,
+    paddingBottom: 24,
     paddingHorizontal: 20,
-    paddingTop: 54,
-    paddingBottom: 20,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
   },
   saludo: {
-    color: '#FFFFFF',
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginBottom: 4,
   },
   rol: {
-    color: '#BFDBFE',
     fontSize: 14,
-    marginTop: 4,
+    color: '#E8F2FF',
   },
   contenido: {
     padding: 16,
-    paddingBottom: 20,
   },
   seccionEncabezado: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '700',
-    color: '#18324B',
+    color: '#62758A',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
     marginBottom: 12,
+    marginTop: 4,
   },
   moduloTarjeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
     padding: 16,
     marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
     borderWidth: 1,
     borderColor: '#DCE6EF',
-    shadowColor: '#18324B',
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
     elevation: 2,
   },
   moduloIconoContenedor: {
-    width: 46,
-    height: 46,
+    width: 48,
+    height: 48,
     borderRadius: 12,
-    backgroundColor: '#E8F2FF',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
@@ -133,27 +132,10 @@ const styles = StyleSheet.create({
   moduloInfo: {
     flex: 1,
   },
-  moduloFilaTitulo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingRight: 6,
-  },
   moduloTitulo: {
     fontSize: 16,
     fontWeight: '700',
     color: '#18324B',
-  },
-  rfBadge: {
-    backgroundColor: '#E8F2FF',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  rfBadgeTexto: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#1D66C2',
   },
   moduloDesc: {
     fontSize: 13,
@@ -170,13 +152,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 12,
+    marginTop: 8,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: '#DCE6EF',
   },
   tituloPeq: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     color: '#18324B',
     marginBottom: 8,
   },

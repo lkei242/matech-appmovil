@@ -1,4 +1,4 @@
-// Carga del comprobante de la transferencia (RF-M05).
+// Carga del comprobante de la transferencia.
 // Se puede cargar más de un comprobante por factura. El servidor valida el archivo otra vez.
 
 import React, { useState } from 'react';

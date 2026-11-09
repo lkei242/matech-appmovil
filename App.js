@@ -14,6 +14,7 @@ import FacturasScreen from './src/features/facturas/FacturasScreen';
 import ServiciosScreen from './src/features/servicios/ServiciosScreen';
 import PerfilScreen from './src/features/perfil/PerfilScreen';
 import OfflineScreen from './src/features/offline/OfflineScreen';
+import BuscarAlumnosScreen from './src/features/alumnos/BuscarAlumnosScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -43,6 +44,11 @@ function Pantallas() {
         {sesion ? (
           <>
             <Stack.Screen name="Dashboard" component={DashboardScreen} />
+            <Stack.Screen
+              name="BuscarAlumnos"
+              component={BuscarAlumnosScreen}
+              options={{ headerShown: true, title: 'Búsqueda de Alumnos', headerTintColor: '#18324B' }}
+            />
             {PANTALLAS_PAGOS.map((pantalla) => (
               <Stack.Screen
                 key={pantalla.name}

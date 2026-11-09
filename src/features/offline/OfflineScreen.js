@@ -113,7 +113,7 @@ export default function OfflineScreen({ navigation }) {
           <Text style={styles.botonVolverTexto}>‹ Volver</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitulo}>Consulta Offline</Text>
-        <Text style={styles.headerSubtitulo}>Datos disponibles sin conexión (RF-M17)</Text>
+        <Text style={styles.headerSubtitulo}>Datos disponibles sin conexión</Text>
       </View>
 
       {/* Barra de estado de sincronización */}

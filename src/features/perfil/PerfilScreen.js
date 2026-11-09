@@ -147,7 +147,7 @@ export default function PerfilScreen({ navigation }) {
           <Text style={styles.botonVolverTexto}>‹ Volver</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitulo}>Mi Perfil</Text>
-        <Text style={styles.headerSubtitulo}>Datos de la cuenta y contacto (RF-M18)</Text>
+        <Text style={styles.headerSubtitulo}>Datos de la cuenta y contacto</Text>
       </View>
 
       <ScrollView

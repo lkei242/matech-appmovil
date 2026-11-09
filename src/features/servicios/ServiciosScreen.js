@@ -364,7 +364,7 @@ export default function ServiciosScreen({ navigation }) {
             </TouchableOpacity>
           ) : (
             <Text style={styles.avisoLimite}>
-              Ha alcanzado el límite máximo de 2 deportes simultáneos (RF-M16).
+              Ha alcanzado el límite máximo de 2 deportes simultáneos.
             </Text>
           )}
         </View>

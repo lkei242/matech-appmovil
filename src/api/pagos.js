@@ -3,8 +3,23 @@
 
 import { peticionProtegida } from './cliente';
 
-export function listarAlumnos() {
-  return peticionProtegida('alumnos/');
+export function listarAlumnos(filtros = {}) {
+  const partes = [];
+  if (filtros.q) partes.push(`q=${encodeURIComponent(filtros.q)}`);
+  if (filtros.nivel && filtros.nivel !== 'Todos') partes.push(`nivel=${encodeURIComponent(filtros.nivel)}`);
+  if (filtros.anio && filtros.anio !== 'Todos') partes.push(`anio=${encodeURIComponent(filtros.anio)}`);
+  if (filtros.turno && filtros.turno !== 'Todos') partes.push(`turno=${encodeURIComponent(filtros.turno)}`);
+  if (filtros.estado && filtros.estado !== 'Todos') partes.push(`estado=${encodeURIComponent(filtros.estado)}`);
+  if (filtros.fecha_nacimiento) partes.push(`fecha_nacimiento=${encodeURIComponent(filtros.fecha_nacimiento)}`);
+  if (filtros.anio_nacimiento && filtros.anio_nacimiento !== 'Todos') partes.push(`anio_nacimiento=${encodeURIComponent(filtros.anio_nacimiento)}`);
+  if (filtros.nacimiento_desde) partes.push(`nacimiento_desde=${encodeURIComponent(filtros.nacimiento_desde)}`);
+  if (filtros.nacimiento_hasta) partes.push(`nacimiento_hasta=${encodeURIComponent(filtros.nacimiento_hasta)}`);
+  if (filtros.comedor !== undefined && filtros.comedor !== null && filtros.comedor !== 'Todos') {
+    partes.push(`comedor=${encodeURIComponent(filtros.comedor)}`);
+  }
+
+  const qs = partes.length ? `?${partes.join('&')}` : '';
+  return peticionProtegida(`alumnos/${qs}`);
 }
 
 export function obtenerDeuda(legajo) {
