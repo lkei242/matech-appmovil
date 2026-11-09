@@ -16,8 +16,19 @@ import FacturasScreen from './src/features/facturas/FacturasScreen';
 import ServiciosScreen from './src/features/servicios/ServiciosScreen';
 import PerfilScreen from './src/features/perfil/PerfilScreen';
 import OfflineScreen from './src/features/offline/OfflineScreen';
+import BuscarAlumnosScreen from './src/features/alumnos/BuscarAlumnosScreen';
 
 const Stack = createNativeStackNavigator();
+
+// Barra de título azul que comparten las pantallas con encabezado del navegador.
+const ENCABEZADO_AZUL = {
+  headerShown: true,
+  headerStyle: { backgroundColor: colores.azul },
+  headerTintColor: '#FFFFFF',
+  headerTitleStyle: { fontWeight: '700' },
+  headerShadowVisible: false,
+  contentStyle: { backgroundColor: colores.fondo },
+};
 
 // Pantallas de pagos: usan la barra de título del navegador.
 // Qué módulos ve cada rol se decide en src/navigation/modulos.js.
@@ -45,20 +56,17 @@ function Pantallas() {
         {sesion ? (
           <>
             <Stack.Screen name="Dashboard" component={DashboardScreen} />
+            <Stack.Screen
+              name="BuscarAlumnos"
+              component={BuscarAlumnosScreen}
+              options={{ ...ENCABEZADO_AZUL, title: 'Búsqueda de Alumnos' }}
+            />
             {PANTALLAS_PAGOS.map((pantalla) => (
               <Stack.Screen
                 key={pantalla.name}
                 name={pantalla.name}
                 component={pantalla.component}
-                options={{
-                  headerShown: true,
-                  title: pantalla.title,
-                  headerStyle: { backgroundColor: colores.azul },
-                  headerTintColor: '#FFFFFF',
-                  headerTitleStyle: { fontWeight: '700' },
-                  headerShadowVisible: false,
-                  contentStyle: { backgroundColor: colores.fondo },
-                }}
+                options={{ ...ENCABEZADO_AZUL, title: pantalla.title }}
               />
             ))}
             <Stack.Screen name="Servicios" component={ServiciosScreen} />

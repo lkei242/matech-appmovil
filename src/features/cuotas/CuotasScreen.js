@@ -1,4 +1,4 @@
-// Cuotas y deuda por alumno (RF-M03 y RF-M06).
+// Cuotas y deuda por alumno.
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -12,9 +12,10 @@ import { formatoFecha, formatoMoneda } from '../../utils/formato';
 
 const ERROR_CONEXION = 'No se pudo conectar con el servidor.';
 
-export default function CuotasScreen() {
+export default function CuotasScreen({ route }) {
+  const paramLegajo = route?.params?.legajo || null;
   const [alumnos, setAlumnos] = useState([]);
-  const [legajo, setLegajo] = useState(null);
+  const [legajo, setLegajo] = useState(paramLegajo);
   const [deuda, setDeuda] = useState(null);
   const [cuotas, setCuotas] = useState([]);
   const [estado, setEstado] = useState('cargando');
@@ -27,13 +28,17 @@ export default function CuotasScreen() {
       if (!resp.ok) throw new Error(mensajeDeError(resp, 'No se pudieron cargar los alumnos.'));
       const lista = resp.datos || [];
       setAlumnos(lista);
-      if (lista.length === 1) setLegajo(lista[0].legajo);
+      if (paramLegajo) {
+        setLegajo(paramLegajo);
+      } else if (lista.length === 1) {
+        setLegajo(lista[0].legajo);
+      }
       setEstado('listo');
     } catch (e) {
       setError(e.message || ERROR_CONEXION);
       setEstado('error');
     }
-  }, []);
+  }, [paramLegajo]);
 
   useEffect(() => {
     cargarAlumnos();

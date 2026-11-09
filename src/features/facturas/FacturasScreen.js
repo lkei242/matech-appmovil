@@ -1,4 +1,4 @@
-// Facturas y comprobantes por alumno y período (RF-M07).
+// Facturas y comprobantes por alumno y período.
 
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -12,9 +12,10 @@ import { formatoFecha, formatoMoneda } from '../../utils/formato';
 
 const PATRON_FECHA = /^\d{4}-\d{2}-\d{2}$/;
 
-export default function FacturasScreen() {
+export default function FacturasScreen({ route }) {
+  const paramLegajo = route?.params?.legajo || null;
   const [alumnos, setAlumnos] = useState([]);
-  const [legajo, setLegajo] = useState(null);
+  const [legajo, setLegajo] = useState(paramLegajo);
   const [desde, setDesde] = useState('');
   const [hasta, setHasta] = useState('');
   const [facturas, setFacturas] = useState([]);
@@ -29,7 +30,11 @@ export default function FacturasScreen() {
         if (!resp.ok) throw new Error(mensajeDeError(resp, 'No se pudieron cargar los alumnos.'));
         const lista = resp.datos || [];
         setAlumnos(lista);
-        if (lista.length === 1) setLegajo(lista[0].legajo);
+        if (paramLegajo) {
+          setLegajo(paramLegajo);
+        } else if (lista.length === 1) {
+          setLegajo(lista[0].legajo);
+        }
         setEstado('listo');
       } catch (e) {
         setError(e.message || 'No se pudo conectar con el servidor.');

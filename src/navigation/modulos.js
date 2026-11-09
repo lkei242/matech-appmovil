@@ -15,16 +15,25 @@ export const ETIQUETAS_ROL = {
 
 const TODOS_LOS_ROLES = ['padre', 'alumno', 'administrativo', 'directivo', 'docente', 'preceptor'];
 const ROLES_CON_CUENTA_ALUMNO = ['padre', 'alumno', 'administrativo', 'directivo'];
+const ROLES_PERSONAL_ESCOLAR = ['administrativo', 'directivo', 'docente', 'preceptor'];
 
 // `tono` define el color del ícono (ver tonos en src/theme.js).
 // `icono` es un nombre de Ionicons (https://icons.expo.fyi).
 
 export const MODULOS = [
   {
+    id: 'buscar_alumnos',
+    titulo: 'Búsqueda de Alumnos',
+    descripcion: 'Padrón escolar con filtros por nombre, DNI, curso, fecha de nacimiento y servicios.',
+    icono: 'search-outline',
+    roles: ROLES_PERSONAL_ESCOLAR,
+    pantalla: 'BuscarAlumnos',
+    tono: 'violeta',
+  },
+  {
     id: 'cuotas',
     titulo: 'Cuotas y deuda',
     descripcion: 'Pendientes, vencimientos y deuda por ítem.',
-    rf: 'RF-M03 / M06',
     icono: 'wallet-outline',
     roles: ROLES_CON_CUENTA_ALUMNO,
     pantalla: 'Cuotas',
@@ -34,7 +43,6 @@ export const MODULOS = [
     id: 'pagar',
     titulo: 'Pagar',
     descripcion: 'Elegí qué pagar y cargá el comprobante de transferencia.',
-    rf: 'RF-M04 / M05',
     icono: 'receipt-outline',
     roles: ['padre'],
     pantalla: 'Pagar',
@@ -44,7 +52,6 @@ export const MODULOS = [
     id: 'facturas',
     titulo: 'Facturas y comprobantes',
     descripcion: 'Consultá facturas y comprobantes por período.',
-    rf: 'RF-M07',
     icono: 'document-text-outline',
     roles: ROLES_CON_CUENTA_ALUMNO,
     pantalla: 'Facturas',
@@ -54,7 +61,6 @@ export const MODULOS = [
     id: 'servicios',
     titulo: 'Servicios Escolares',
     descripcion: 'Inscripción a deportes (máx. 2), transporte (4 recorridos) y comedor escolar.',
-    rf: 'RF-M16',
     icono: 'football-outline',
     roles: ROLES_CON_CUENTA_ALUMNO,
     pantalla: 'Servicios',
@@ -64,7 +70,6 @@ export const MODULOS = [
     id: 'perfil',
     titulo: 'Mi Perfil',
     descripcion: 'Consulta y actualización de correo electrónico y teléfono de contacto.',
-    rf: 'RF-M18',
     icono: 'person-circle-outline',
     roles: TODOS_LOS_ROLES,
     pantalla: 'Perfil',
@@ -74,7 +79,6 @@ export const MODULOS = [
     id: 'offline',
     titulo: 'Consulta Offline',
     descripcion: 'Horarios, recorridos y comunicados guardados para usar sin conexión.',
-    rf: 'RF-M17',
     icono: 'cloud-offline-outline',
     roles: TODOS_LOS_ROLES,
     pantalla: 'Offline',

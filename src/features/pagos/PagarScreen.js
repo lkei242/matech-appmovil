@@ -1,4 +1,4 @@
-// Pago móvil (RF-M04): elegir alumno y factura, elegir ítems, pedir la solicitud de pago
+// Pago móvil: elegir alumno y factura, elegir ítems, pedir la solicitud de pago
 // y después cargar el comprobante de la transferencia.
 //
 // El total que se muestra es solo una vista previa: el servidor lo recalcula y es el que vale.
