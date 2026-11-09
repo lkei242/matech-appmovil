@@ -23,6 +23,7 @@ import {
 
 import { listarAlumnos, mensajeDeError } from '../../api/pagos';
 import { useAuth } from '../../auth/AuthContext';
+import { Icono } from '../../components/ui';
 
 function calcularEdad(fechaIso) {
   if (!fechaIso) return null;
@@ -43,10 +44,10 @@ function calcularEdad(fechaIso) {
 
 function colorPorNivel(nivel) {
   const n = (nivel || '').toLowerCase();
-  if (n.includes('inicial')) return { fondo: '#FEF3C7', texto: '#B45309', badge: '#F59E0B' };
-  if (n.includes('primari')) return { fondo: '#D1FAE5', texto: '#047857', badge: '#10B981' };
-  if (n.includes('secundari')) return { fondo: '#DBEAFE', texto: '#1D4ED8', badge: '#3B82F6' };
-  return { fondo: '#E2E8F0', texto: '#475569', badge: '#64748B' };
+  if (n.includes('inicial')) return { fondo: '#FEEDE8', texto: '#B3300F', badge: '#EE4A2A' };
+  if (n.includes('primari')) return { fondo: '#F1F8E8', texto: '#3F6B14', badge: '#84C440' };
+  if (n.includes('secundari')) return { fondo: '#EAF4FD', texto: '#093C82', badge: '#4FA8E8' };
+  return { fondo: '#DCE5F0', texto: '#3A4D66', badge: '#5B6B80' };
 }
 
 export default function BuscarAlumnosScreen({ navigation }) {
@@ -228,11 +229,11 @@ export default function BuscarAlumnosScreen({ navigation }) {
       {/* Barra de cabecera con buscador */}
       <View style={styles.header}>
         <View style={styles.buscadorContenedor}>
-          <Text style={styles.buscadorLupa}>🔍</Text>
+          <Icono nombre="search-outline" tamano={20} color="#5B6B80" />
           <TextInput
             style={styles.buscadorInput}
             placeholder="Buscar por nombre, apellido, DNI, legajo..."
-            placeholderTextColor="#8E9DAE"
+            placeholderTextColor="#8A99AB"
             value={textoBusqueda}
             onChangeText={setTextoBusqueda}
             autoCorrect={false}
@@ -240,7 +241,7 @@ export default function BuscarAlumnosScreen({ navigation }) {
           />
           {textoBusqueda.length > 0 && Platform.OS !== 'ios' ? (
             <TouchableOpacity onPress={() => setTextoBusqueda('')} style={styles.botonLimpiarInput}>
-              <Text style={styles.limpiarTexto}>✕</Text>
+              <Icono nombre="close-circle" tamano={20} color="#5B6B80" />
             </TouchableOpacity>
           ) : null}
         </View>
@@ -252,7 +253,7 @@ export default function BuscarAlumnosScreen({ navigation }) {
           accessibilityRole="button"
         >
           <Text style={[styles.botonFiltroTexto, (panelFiltrosVisible || filtrosActivosCount > 0) && styles.botonFiltroTextoActivo]}>
-            ⚙ Filtros {filtrosActivosCount > 0 ? `(${filtrosActivosCount})` : ''}
+            Filtros {filtrosActivosCount > 0 ? `(${filtrosActivosCount})` : ''}
           </Text>
         </TouchableOpacity>
       </View>
@@ -410,7 +411,7 @@ export default function BuscarAlumnosScreen({ navigation }) {
         </View>
       ) : error ? (
         <View style={styles.centrado}>
-          <Text style={styles.errorIcono}>⚠️</Text>
+          <Icono nombre="alert-circle-outline" tamano={40} color="#B3261E" />
           <Text style={styles.errorTexto}>{error}</Text>
           <TouchableOpacity style={styles.botonReintentar} onPress={cargarAlumnos}>
             <Text style={styles.botonReintentarTexto}>Reintentar</Text>
@@ -423,7 +424,7 @@ export default function BuscarAlumnosScreen({ navigation }) {
         >
           {alumnosFiltrados.length === 0 ? (
             <View style={styles.vacioContenedor}>
-              <Text style={styles.vacioIcono}>🔍</Text>
+              <Icono nombre="search-outline" tamano={40} color="#5B6B80" />
               <Text style={styles.vacioTitulo}>Sin coincidencias</Text>
               <Text style={styles.vacioDesc}>
                 No se encontraron alumnos con los criterios de búsqueda o filtros seleccionados.
@@ -473,13 +474,13 @@ export default function BuscarAlumnosScreen({ navigation }) {
                     <View style={styles.filaSecundaria}>
                       {alum.fecha_nacimiento ? (
                         <Text style={styles.fechaNac}>
-                          🎂 {alum.fecha_nacimiento} {edad !== null ? `(${edad} años)` : ''}
+                          {alum.fecha_nacimiento} {edad !== null ? `(${edad} años)` : ''}
                         </Text>
                       ) : null}
 
                       {alum.inscripto_comedor ? (
                         <View style={styles.badgeComedor}>
-                          <Text style={styles.badgeComedorTexto}>🍽️ Comedor</Text>
+                          <Text style={styles.badgeComedorTexto}>Comedor</Text>
                         </View>
                       ) : null}
                     </View>
@@ -507,7 +508,7 @@ export default function BuscarAlumnosScreen({ navigation }) {
               style={styles.botonCerrarModal}
               onPress={() => setAlumnoSeleccionado(null)}
             >
-              <Text style={styles.botonCerrarTexto}>✕</Text>
+              <Icono nombre="close" tamano={22} color="#0F2A4D" />
             </TouchableOpacity>
           </View>
 
@@ -552,7 +553,7 @@ export default function BuscarAlumnosScreen({ navigation }) {
 
               {/* Sección: Datos Académicos */}
               <View style={styles.seccionFicha}>
-                <Text style={styles.seccionFichaTitulo}>📚 Datos Académicos</Text>
+                <Text style={styles.seccionFichaTitulo}>Datos Académicos</Text>
                 <View style={styles.filaDato}>
                   <Text style={styles.datoEtiqueta}>Curso / Comisión:</Text>
                   <Text style={styles.datoValor}>{alumnoSeleccionado.curso || 'Sin asignar'}</Text>
@@ -569,7 +570,7 @@ export default function BuscarAlumnosScreen({ navigation }) {
 
               {/* Sección: Datos Personales */}
               <View style={styles.seccionFicha}>
-                <Text style={styles.seccionFichaTitulo}>👤 Información Personal</Text>
+                <Text style={styles.seccionFichaTitulo}>Información Personal</Text>
                 <View style={styles.filaDato}>
                   <Text style={styles.datoEtiqueta}>Fecha de Nacimiento:</Text>
                   <Text style={styles.datoValor}>
@@ -599,7 +600,7 @@ export default function BuscarAlumnosScreen({ navigation }) {
 
               {/* Sección: Tutor / Familiar a Cargo */}
               <View style={styles.seccionFicha}>
-                <Text style={styles.seccionFichaTitulo}>👨‍👩‍👧 Tutor / Contacto de Emergencia</Text>
+                <Text style={styles.seccionFichaTitulo}>Tutor / Contacto de Emergencia</Text>
                 {alumnoSeleccionado.tutor ? (
                   <>
                     <View style={styles.filaDato}>
@@ -626,7 +627,7 @@ export default function BuscarAlumnosScreen({ navigation }) {
                           style={styles.botonContacto}
                           onPress={() => llamarTutor(alumnoSeleccionado.tutor.telefono)}
                         >
-                          <Text style={styles.botonContactoTexto}>📞 Llamar al Tutor</Text>
+                          <Text style={styles.botonContactoTexto}>Llamar al Tutor</Text>
                         </TouchableOpacity>
                       ) : null}
                       {alumnoSeleccionado.tutor.email ? (
@@ -635,7 +636,7 @@ export default function BuscarAlumnosScreen({ navigation }) {
                           onPress={() => enviarEmailTutor(alumnoSeleccionado.tutor.email)}
                         >
                           <Text style={[styles.botonContactoTexto, styles.botonContactoTextoEmail]}>
-                            ✉️ Enviar Correo
+                            Enviar correo
                           </Text>
                         </TouchableOpacity>
                       ) : null}
@@ -648,18 +649,18 @@ export default function BuscarAlumnosScreen({ navigation }) {
 
               {/* Sección: Servicios Escolares */}
               <View style={styles.seccionFicha}>
-                <Text style={styles.seccionFichaTitulo}>🏫 Servicios Escolares</Text>
+                <Text style={styles.seccionFichaTitulo}>Servicios Escolares</Text>
                 <View style={styles.filaDato}>
                   <Text style={styles.datoEtiqueta}>Comedor Escolar:</Text>
                   <Text style={[styles.datoValor, alumnoSeleccionado.inscripto_comedor ? styles.valorActivo : styles.valorInactivo]}>
-                    {alumnoSeleccionado.inscripto_comedor ? '✓ Inscripto (Almuerzo diario)' : '✕ No inscripto'}
+                    {alumnoSeleccionado.inscripto_comedor ? 'Inscripto (almuerzo diario)' : 'No inscripto'}
                   </Text>
                 </View>
               </View>
 
               {/* Accesos directos a módulos de la app para este alumno */}
               <View style={styles.seccionAccesos}>
-                <Text style={styles.seccionFichaTitulo}>⚡ Accesos Rápidos</Text>
+                <Text style={styles.seccionFichaTitulo}>Accesos Rápidos</Text>
                 <View style={styles.filaBotonesAcceso}>
                   {puedeVerFinanzas && (
                     <>
@@ -671,7 +672,7 @@ export default function BuscarAlumnosScreen({ navigation }) {
                           navigation.navigate('Cuotas', { legajo: leg });
                         }}
                       >
-                        <Text style={styles.botonAccesoTexto}>💳 Ver Cuotas / Deuda</Text>
+                        <Text style={styles.botonAccesoTexto}>Ver Cuotas / Deuda</Text>
                       </TouchableOpacity>
 
                       <TouchableOpacity
@@ -682,7 +683,7 @@ export default function BuscarAlumnosScreen({ navigation }) {
                           navigation.navigate('Facturas', { legajo: leg });
                         }}
                       >
-                        <Text style={styles.botonAccesoTexto}>📄 Ver Facturas</Text>
+                        <Text style={styles.botonAccesoTexto}>Ver Facturas</Text>
                       </TouchableOpacity>
                     </>
                   )}
@@ -694,7 +695,7 @@ export default function BuscarAlumnosScreen({ navigation }) {
                       navigation.navigate('Servicios');
                     }}
                   >
-                    <Text style={styles.botonAccesoTexto}>🏃 Servicios Escolares</Text>
+                    <Text style={styles.botonAccesoTexto}>Servicios Escolares</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -740,7 +741,7 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   limpiarTexto: {
-    color: '#8E9DAE',
+    color: '#8A99AB',
     fontSize: 14,
   },
   botonFiltroToggle: {
@@ -796,9 +797,9 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 16,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#EEF2F7',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: '#C3D1E0',
   },
   chipActivo: {
     backgroundColor: '#0B4DA8',
@@ -806,7 +807,7 @@ const styles = StyleSheet.create({
   },
   chipTexto: {
     fontSize: 12,
-    color: '#334155',
+    color: '#0F2A4D',
     fontWeight: '600',
   },
   chipTextoActivo: {
@@ -819,7 +820,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: '#EEF2F7',
   },
   botonLimpiarFiltros: {
     paddingVertical: 8,
@@ -961,10 +962,10 @@ const styles = StyleSheet.create({
   },
   fechaNac: {
     fontSize: 12,
-    color: '#475569',
+    color: '#3A4D66',
   },
   badgeComedor: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#FEEDE8',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
@@ -972,11 +973,11 @@ const styles = StyleSheet.create({
   badgeComedorTexto: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#B45309',
+    color: '#B3300F',
   },
   flecha: {
     fontSize: 22,
-    color: '#8E9DAE',
+    color: '#8A99AB',
     marginLeft: 8,
   },
   vacioContenedor: {
@@ -1086,15 +1087,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   badgeActivo: {
-    backgroundColor: '#D1FAE5',
+    backgroundColor: '#F1F8E8',
   },
   badgeInactivo: {
-    backgroundColor: '#FEE2E2',
+    backgroundColor: '#FDECEA',
   },
   badgeEstadoTexto: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#047857',
+    color: '#3F6B14',
   },
   badgeNivelFicha: {
     paddingVertical: 3,
@@ -1124,26 +1125,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#F8FAFC',
+    borderBottomColor: '#F6F9FD',
   },
   datoEtiqueta: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#5B6B80',
     flex: 1,
   },
   datoValor: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#1E293B',
+    color: '#0F2A4D',
     flex: 1.5,
     textAlign: 'right',
   },
   valorActivo: {
-    color: '#047857',
+    color: '#3F6B14',
     fontWeight: '700',
   },
   valorInactivo: {
-    color: '#64748B',
+    color: '#5B6B80',
   },
   filaBotonesContacto: {
     flexDirection: 'row',
@@ -1170,7 +1171,7 @@ const styles = StyleSheet.create({
   },
   sinTutorTexto: {
     fontSize: 13,
-    color: '#64748B',
+    color: '#5B6B80',
     fontStyle: 'italic',
   },
   seccionAccesos: {
@@ -1185,12 +1186,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   botonAcceso: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#EEF2F7',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: '#C3D1E0',
   },
   botonAccesoTexto: {
     fontSize: 14,

@@ -12,7 +12,7 @@ import {
 import SelectorAlumno from '../../components/SelectorAlumno';
 import { useAuth } from '../../auth/AuthContext';
 import { obtenerCopiaOffline, sincronizarDatosOffline } from './offlineStorage';
-import { EncabezadoPantalla } from '../../components/ui';
+import { EncabezadoPantalla, Icono } from '../../components/ui';
 
 function formatearFechaHora(isoString) {
   if (!isoString) return 'Nunca sincronizado';
@@ -91,20 +91,8 @@ export default function OfflineScreen({ navigation }) {
     })();
   }, [cargarCopiaLocal, sincronizar]);
 
-  if (cargando) {
-    return (
-      <View style={styles.pantallaCentrada}>
-        <ActivityIndicator size="large" color="#0B4DA8" />
-        <Text style={styles.cargandoTexto}>Cargando datos offline...</Text>
-      </View>
-    );
-  }
-
-  const ultimaSync = datosOffline?.sincronizado_en;
+  // Los hooks van siempre antes de cualquier return: React exige el mismo orden en cada render.
   const alumnos = datosOffline?.alumnos || [];
-  const catalogoDeportes = datosOffline?.catalogo_deportes || [];
-  const catalogoTransporte = datosOffline?.catalogo_transporte || [];
-  const comunicados = datosOffline?.comunicados || [];
 
   const alumnosFiltrados = useMemo(() => {
     let lista = alumnos;
@@ -133,6 +121,20 @@ export default function OfflineScreen({ navigation }) {
     return lista;
   }, [alumnos, alumnoFiltroLegajo, busquedaTexto]);
 
+  if (cargando) {
+    return (
+      <View style={styles.pantallaCentrada}>
+        <ActivityIndicator size="large" color="#0B4DA8" />
+        <Text style={styles.cargandoTexto}>Cargando datos offline...</Text>
+      </View>
+    );
+  }
+
+  const ultimaSync = datosOffline?.sincronizado_en;
+  const catalogoDeportes = datosOffline?.catalogo_deportes || [];
+  const catalogoTransporte = datosOffline?.catalogo_transporte || [];
+  const comunicados = datosOffline?.comunicados || [];
+
   return (
     <View style={styles.contenedor}>
       <EncabezadoPantalla
@@ -155,7 +157,7 @@ export default function OfflineScreen({ navigation }) {
           {sincronizando ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <Text style={styles.botonSyncTexto}>↻ Sincronizar</Text>
+            <Text style={styles.botonSyncTexto}>Sincronizar</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -242,11 +244,11 @@ export default function OfflineScreen({ navigation }) {
                 />
 
                 <View style={styles.buscadorDirectoCaja}>
-                  <Text style={styles.buscadorDirectoLupa}>🔍</Text>
+                  <Icono nombre="search-outline" tamano={20} color="#5B6B80" />
                   <TextInput
                     style={styles.buscadorDirectoInput}
                     placeholder="Filtrar servicios por nombre, DNI o legajo..."
-                    placeholderTextColor="#8E9DAE"
+                    placeholderTextColor="#8A99AB"
                     value={busquedaTexto}
                     onChangeText={setBusquedaTexto}
                     clearButtonMode="while-editing"
@@ -254,7 +256,7 @@ export default function OfflineScreen({ navigation }) {
                   />
                   {busquedaTexto.length > 0 && (
                     <TouchableOpacity onPress={() => setBusquedaTexto('')} style={styles.limpiarBusquedaBtn}>
-                      <Text style={styles.limpiarBusquedaBtnTexto}>✕</Text>
+                      <Icono nombre="close-circle" tamano={20} color="#5B6B80" />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -339,7 +341,7 @@ export default function OfflineScreen({ navigation }) {
 
                   <Text style={styles.subTituloCampo}>Comedor Escolar:</Text>
                   <Text style={a.comedor ? styles.comedorActivo : styles.itemGris}>
-                    {a.comedor ? '✓ Inscripto al servicio de comedor' : 'No inscripto'}
+                    {a.comedor ? 'Inscripto al servicio de comedor' : 'No inscripto'}
                   </Text>
                 </View>
               ))
@@ -651,7 +653,7 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   limpiarBusquedaBtnTexto: {
-    color: '#8E9DAE',
+    color: '#8A99AB',
     fontSize: 13,
   },
   barraResumenFiltro: {

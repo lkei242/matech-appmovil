@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useAuth } from '../../auth/AuthContext';
-import { EncabezadoPantalla } from '../../components/ui';
+import { EncabezadoPantalla, Icono } from '../../components/ui';
 import SelectorAlumno from '../../components/SelectorAlumno';
 import {
   actualizarComedor,
@@ -384,7 +384,7 @@ export default function ServiciosScreen({ navigation, route }) {
                 >
                   <View style={styles.recorridoInfo}>
                     <Text style={[styles.recorridoNombre, esSeleccionado && styles.recorridoNombreActivo]}>
-                      {rec.nombre} {esSeleccionado && '✓ (Asignado)'}
+                      {rec.nombre} {esSeleccionado && '(Asignado)'}
                     </Text>
                     <Text style={styles.recorridoDesc}>{rec.descripcion}</Text>
                   </View>
@@ -449,7 +449,7 @@ export default function ServiciosScreen({ navigation, route }) {
                 onPress={() => setModalDeportesVisible(false)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Text style={styles.modalCerrar}>✕</Text>
+                <Icono nombre="close" tamano={22} color="#0F2A4D" />
               </TouchableOpacity>
             </View>
 

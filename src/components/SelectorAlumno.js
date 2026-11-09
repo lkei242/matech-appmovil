@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Icono } from './ui';
 
 export default function SelectorAlumno({
   alumnos = [],
@@ -135,7 +136,7 @@ export default function SelectorAlumno({
             onPress={() => setModalVisible(true)}
             accessibilityLabel="Buscar alumno"
           >
-            <Text style={styles.lupaIcono}>🔍</Text>
+            <Icono nombre="search-outline" tamano={20} color="#0B4DA8" />
           </TouchableOpacity>
         </View>
       ) : (
@@ -146,7 +147,7 @@ export default function SelectorAlumno({
               <Text style={styles.avatarMiniTexto}>
                 {alumnoActivo
                   ? (alumnoActivo.nombre?.[0] || 'A') + (alumnoActivo.apellido?.[0] || '')
-                  : '👥'}
+                  : 'T'}
               </Text>
             </View>
             <View style={styles.textosActivo}>
@@ -178,7 +179,7 @@ export default function SelectorAlumno({
             accessibilityRole="button"
           >
             <Text style={styles.botonCambiarTexto}>
-              {alumnoActivo ? '🔍 Cambiar' : '🔍 Filtrar Alumno'}
+              {alumnoActivo ? 'Cambiar' : 'Filtrar alumno'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -203,13 +204,13 @@ export default function SelectorAlumno({
               style={styles.botonCerrar}
               onPress={() => setModalVisible(false)}
             >
-              <Text style={styles.botonCerrarTexto}>✕</Text>
+              <Icono nombre="close" tamano={22} color="#0F2A4D" />
             </TouchableOpacity>
           </View>
 
           {/* Campo de búsqueda */}
           <View style={styles.buscadorCaja}>
-            <Text style={styles.buscadorIcono}>🔍</Text>
+            <Icono nombre="search-outline" tamano={20} color="#5B6B80" />
             <TextInput
               style={styles.buscadorInput}
               placeholder="Buscar por nombre, DNI, legajo, curso..."
@@ -221,7 +222,7 @@ export default function SelectorAlumno({
             />
             {busqueda.length > 0 && Platform.OS !== 'ios' ? (
               <TouchableOpacity onPress={() => setBusqueda('')} style={styles.limpiarInput}>
-                <Text style={styles.limpiarInputTexto}>✕</Text>
+                <Icono nombre="close-circle" tamano={20} color="#5B6B80" />
               </TouchableOpacity>
             ) : null}
           </View>
@@ -299,14 +300,14 @@ export default function SelectorAlumno({
                 activeOpacity={0.7}
               >
                 <View style={[styles.itemAvatar, { backgroundColor: '#F1F8E8' }]}>
-                  <Text style={[styles.itemAvatarTexto, { color: '#3F6B14' }]}>👥</Text>
+                  <Icono nombre="people" tamano={20} color="#3F6B14" />
                 </View>
                 <View style={styles.itemInfo}>
                   <View style={styles.itemFilaPrincipal}>
                     <Text style={styles.itemNombre}>Todos los alumnos</Text>
                     {!seleccionado && (
                       <View style={styles.badgeSeleccionado}>
-                        <Text style={styles.badgeSeleccionadoTexto}>✓ Activo</Text>
+                        <Text style={styles.badgeSeleccionadoTexto}>Activo</Text>
                       </View>
                     )}
                   </View>
@@ -319,7 +320,7 @@ export default function SelectorAlumno({
 
             {alumnosFiltrados.length === 0 ? (
               <View style={styles.estadoVacio}>
-                <Text style={styles.vacioIcono}>🔍</Text>
+                <Icono nombre="search-outline" tamano={40} color="#5B6B80" />
                 <Text style={styles.vacioTitulo}>No se encontraron alumnos</Text>
                 <Text style={styles.vacioDesc}>
                   Intenta con otro término de búsqueda o ajusta los filtros.
@@ -347,7 +348,7 @@ export default function SelectorAlumno({
                         </Text>
                         {esActivo && (
                           <View style={styles.badgeSeleccionado}>
-                            <Text style={styles.badgeSeleccionadoTexto}>✓ Activo</Text>
+                            <Text style={styles.badgeSeleccionadoTexto}>Activo</Text>
                           </View>
                         )}
                       </View>

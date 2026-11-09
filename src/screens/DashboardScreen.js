@@ -3,7 +3,6 @@ import { Image, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } 
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
 import { useAuth } from '../auth/AuthContext';
-import { API_BASE_URL } from '../api';
 import { listarAlumnos, obtenerDeuda } from '../api/pagos';
 import { Boton, FranjaLogo, Icono, IconoTono, Insignia } from '../components/ui';
 import { ETIQUETAS_ROL, modulosPara } from '../navigation/modulos';
@@ -168,9 +167,6 @@ export default function DashboardScreen({ navigation }) {
           </View>
 
           <Boton texto="Cerrar sesión" variante="peligro" icono="log-out-outline" onPress={() => logout()} />
-
-          {/* Dato técnico solo para desarrollo */}
-          {__DEV__ ? <Text style={styles.dev}>Servidor API: {API_BASE_URL}</Text> : null}
         </View>
       </ScrollView>
     </View>
@@ -341,10 +337,5 @@ const styles = StyleSheet.create({
     color: colores.tinta,
     fontSize: 14,
     fontWeight: '700',
-  },
-  dev: {
-    color: colores.suave,
-    fontSize: 11,
-    textAlign: 'center',
   },
 });
