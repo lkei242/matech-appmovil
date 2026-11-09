@@ -1,8 +1,10 @@
-// Componente inteligente para seleccionar alumno en pantallas operativas (Cuotas, Facturas, Pagos, etc.).
+// Componente inteligente para seleccionar alumno en pantallas operativas
+// (Cuotas, Facturas, Pagos, Servicios Escolares y Consulta Offline).
 //
 // Para familias (1-3 alumnos): ofrece selección rápida directa por fichas.
 // Para personal escolar (muchos alumnos): ofrece buscador integrado por nombre, DNI, legajo,
 // nivel, turno y fecha de nacimiento, eliminando la necesidad de deslizar infinitamente.
+// Soporta la opción `permitirTodos` para pantallas que admiten vista global (ej: Offline).
 
 import React, { useMemo, useState } from 'react';
 import {
@@ -17,14 +19,20 @@ import {
   View,
 } from 'react-native';
 
-export default function SelectorAlumno({ alumnos = [], seleccionado, onSeleccionar }) {
+export default function SelectorAlumno({
+  alumnos = [],
+  seleccionado,
+  onSeleccionar,
+  permitirTodos = false,
+}) {
   const [modalVisible, setModalVisible] = useState(false);
   const [busqueda, setBusqueda] = useState('');
   const [filtroNivel, setFiltroNivel] = useState('Todos');
   const [filtroTurno, setFiltroTurno] = useState('Todos');
 
   const alumnoActivo = useMemo(() => {
-    return alumnos.find((a) => a.legajo === seleccionado) || null;
+    if (!seleccionado || seleccionado === 'todos') return null;
+    return alumnos.find((a) => a.legajo === seleccionado || a.id === seleccionado) || null;
   }, [alumnos, seleccionado]);
 
   const nivelesDisponibles = useMemo(() => {
@@ -88,12 +96,24 @@ export default function SelectorAlumno({ alumnos = [], seleccionado, onSeleccion
       {esListaCorta ? (
         <View style={styles.filaCorta}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filaScroll}>
+            {permitirTodos && (
+              <TouchableOpacity
+                onPress={() => onSeleccionar(null)}
+                style={[styles.chip, !seleccionado && styles.chipActivo]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: !seleccionado }}
+              >
+                <Text style={[styles.texto, !seleccionado && styles.textoActivo]}>
+                  Todos ({alumnos.length})
+                </Text>
+              </TouchableOpacity>
+            )}
             {alumnos.map((alumno) => {
-              const activo = alumno.legajo === seleccionado;
+              const activo = alumno.legajo === seleccionado || alumno.id === seleccionado;
               return (
                 <TouchableOpacity
-                  key={alumno.legajo}
-                  onPress={() => onSeleccionar(alumno.legajo)}
+                  key={alumno.legajo || alumno.id}
+                  onPress={() => onSeleccionar(alumno.legajo || alumno.id)}
                   style={[styles.chip, activo && styles.chipActivo]}
                   accessibilityRole="button"
                   accessibilityState={{ selected: activo }}
@@ -124,19 +144,30 @@ export default function SelectorAlumno({ alumnos = [], seleccionado, onSeleccion
           <View style={styles.infoAlumnoActivo}>
             <View style={styles.avatarMini}>
               <Text style={styles.avatarMiniTexto}>
-                {(alumnoActivo?.nombre?.[0] || 'A') + (alumnoActivo?.apellido?.[0] || '')}
+                {alumnoActivo
+                  ? (alumnoActivo.nombre?.[0] || 'A') + (alumnoActivo.apellido?.[0] || '')
+                  : '👥'}
               </Text>
             </View>
             <View style={styles.textosActivo}>
-              <Text style={styles.etiquetaActivo}>Alumno en consulta:</Text>
+              <Text style={styles.etiquetaActivo}>
+                {alumnoActivo ? 'Alumno seleccionado:' : 'Visualización:'}
+              </Text>
               <Text style={styles.nombreActivo} numberOfLines={1}>
                 {alumnoActivo
                   ? `${alumnoActivo.nombre} ${alumnoActivo.apellido}`
-                  : 'Ningún alumno seleccionado'}
+                  : `Todos los alumnos (${alumnos.length})`}
               </Text>
               <Text style={styles.detallesActivo}>
-                Legajo: {alumnoActivo?.legajo || '—'}
-                {alumnoActivo?.curso ? ` · ${alumnoActivo.curso}` : alumnoActivo?.nivel ? ` · ${alumnoActivo.nivel}` : ''}
+                {alumnoActivo
+                  ? `Legajo: ${alumnoActivo.legajo || '—'}${
+                      alumnoActivo.curso
+                        ? ` · ${alumnoActivo.curso}`
+                        : alumnoActivo.nivel
+                        ? ` · ${alumnoActivo.nivel}`
+                        : ''
+                    }`
+                  : 'Mostrando servicios activos del padrón escolar'}
               </Text>
             </View>
           </View>
@@ -146,7 +177,9 @@ export default function SelectorAlumno({ alumnos = [], seleccionado, onSeleccion
             onPress={() => setModalVisible(true)}
             accessibilityRole="button"
           >
-            <Text style={styles.botonCambiarTexto}>🔍 Buscar / Cambiar</Text>
+            <Text style={styles.botonCambiarTexto}>
+              {alumnoActivo ? '🔍 Cambiar' : '🔍 Filtrar Alumno'}
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -258,6 +291,32 @@ export default function SelectorAlumno({ alumnos = [], seleccionado, onSeleccion
           </View>
 
           <ScrollView contentContainerStyle={styles.listaModal}>
+            {/* Opción 'Todos los alumnos' si está permitida */}
+            {permitirTodos && (
+              <TouchableOpacity
+                style={[styles.itemAlumno, !seleccionado && styles.itemAlumnoActivo]}
+                onPress={() => seleccionarYcerrar(null)}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.itemAvatar, { backgroundColor: '#EDF6E7' }]}>
+                  <Text style={[styles.itemAvatarTexto, { color: '#4C7A2E' }]}>👥</Text>
+                </View>
+                <View style={styles.itemInfo}>
+                  <View style={styles.itemFilaPrincipal}>
+                    <Text style={styles.itemNombre}>Todos los alumnos</Text>
+                    {!seleccionado && (
+                      <View style={styles.badgeSeleccionado}>
+                        <Text style={styles.badgeSeleccionadoTexto}>✓ Activo</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.itemDetalle}>
+                    Mostrar los servicios activos de los {alumnos.length} alumnos
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
+
             {alumnosFiltrados.length === 0 ? (
               <View style={styles.estadoVacio}>
                 <Text style={styles.vacioIcono}>🔍</Text>
@@ -268,12 +327,12 @@ export default function SelectorAlumno({ alumnos = [], seleccionado, onSeleccion
               </View>
             ) : (
               alumnosFiltrados.map((alumno) => {
-                const esActivo = alumno.legajo === seleccionado;
+                const esActivo = alumno.legajo === seleccionado || alumno.id === seleccionado;
                 return (
                   <TouchableOpacity
-                    key={alumno.legajo}
+                    key={alumno.legajo || alumno.id}
                     style={[styles.itemAlumno, esActivo && styles.itemAlumnoActivo]}
-                    onPress={() => seleccionarYcerrar(alumno.legajo)}
+                    onPress={() => seleccionarYcerrar(alumno.legajo || alumno.id)}
                     activeOpacity={0.7}
                   >
                     <View style={styles.itemAvatar}>
