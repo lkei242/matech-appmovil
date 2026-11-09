@@ -1,13 +1,15 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import SelectorAlumno from '../../components/SelectorAlumno';
 import { useAuth } from '../../auth/AuthContext';
 import { obtenerCopiaOffline, sincronizarDatosOffline } from './offlineStorage';
 import { EncabezadoPantalla } from '../../components/ui';
@@ -37,6 +39,8 @@ export default function OfflineScreen({ navigation }) {
   const [datosOffline, setDatosOffline] = useState(null);
   const [pestañaActiva, setPestañaActiva] = useState('servicios');
   const [aviso, setAviso] = useState(null);
+  const [alumnoFiltroLegajo, setAlumnoFiltroLegajo] = useState(null);
+  const [busquedaTexto, setBusquedaTexto] = useState('');
 
   const cargarCopiaLocal = useCallback(async () => {
     if (!username) return;
@@ -101,6 +105,33 @@ export default function OfflineScreen({ navigation }) {
   const catalogoDeportes = datosOffline?.catalogo_deportes || [];
   const catalogoTransporte = datosOffline?.catalogo_transporte || [];
   const comunicados = datosOffline?.comunicados || [];
+
+  const alumnosFiltrados = useMemo(() => {
+    let lista = alumnos;
+    if (alumnoFiltroLegajo) {
+      lista = lista.filter(
+        (a) => a.legajo === alumnoFiltroLegajo || a.id === alumnoFiltroLegajo
+      );
+    }
+    const q = busquedaTexto.trim().toLowerCase();
+    if (q) {
+      lista = lista.filter((a) => {
+        const nom = (a.nombre || '').toLowerCase();
+        const leg = String(a.legajo || '').toLowerCase();
+        const dni = String(a.dni || '').toLowerCase();
+        const cur = String(a.curso || '').toLowerCase();
+        const fn = String(a.fecha_nacimiento || '').toLowerCase();
+        return (
+          nom.includes(q) ||
+          leg.includes(q) ||
+          dni.includes(q) ||
+          cur.includes(q) ||
+          fn.includes(q)
+        );
+      });
+    }
+    return lista;
+  }, [alumnos, alumnoFiltroLegajo, busquedaTexto]);
 
   return (
     <View style={styles.contenedor}>
@@ -199,16 +230,81 @@ export default function OfflineScreen({ navigation }) {
         {pestañaActiva === 'servicios' && (
           <View>
             <Text style={styles.seccionTitulo}>Servicios Activos por Alumno</Text>
-            {alumnos.length === 0 ? (
+
+            {/* Menú de búsqueda y selector inteligente igual a Cuotas y Deuda */}
+            {alumnos.length > 0 && (
+              <View style={styles.contenedorFiltrosOffline}>
+                <SelectorAlumno
+                  alumnos={alumnos}
+                  seleccionado={alumnoFiltroLegajo}
+                  onSeleccionar={(leg) => setAlumnoFiltroLegajo(leg)}
+                  permitirTodos={true}
+                />
+
+                <View style={styles.buscadorDirectoCaja}>
+                  <Text style={styles.buscadorDirectoLupa}>🔍</Text>
+                  <TextInput
+                    style={styles.buscadorDirectoInput}
+                    placeholder="Filtrar servicios por nombre, DNI o legajo..."
+                    placeholderTextColor="#8E9DAE"
+                    value={busquedaTexto}
+                    onChangeText={setBusquedaTexto}
+                    clearButtonMode="while-editing"
+                    autoCorrect={false}
+                  />
+                  {busquedaTexto.length > 0 && (
+                    <TouchableOpacity onPress={() => setBusquedaTexto('')} style={styles.limpiarBusquedaBtn}>
+                      <Text style={styles.limpiarBusquedaBtnTexto}>✕</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                <View style={styles.barraResumenFiltro}>
+                  <Text style={styles.textoResumenFiltro}>
+                    Mostrando {alumnosFiltrados.length} {alumnosFiltrados.length === 1 ? 'alumno' : 'alumnos'}{' '}
+                    {alumnosFiltrados.length !== alumnos.length ? `(de ${alumnos.length} sincronizados)` : 'sincronizados'}
+                  </Text>
+                  {(alumnoFiltroLegajo !== null || busquedaTexto.length > 0) && (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setAlumnoFiltroLegajo(null);
+                        setBusquedaTexto('');
+                      }}
+                    >
+                      <Text style={styles.enlaceRestablecerFiltros}>Ver todos</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            )}
+
+            {/* Interfaz desplegada de servicios activos (CONSERVADA IDÉNTICA) */}
+            {alumnosFiltrados.length === 0 ? (
               <View style={styles.tarjetaVacia}>
-                <Text style={styles.vacioTexto}>No hay datos de alumnos sincronizados.</Text>
+                <Text style={styles.vacioTexto}>
+                  {alumnos.length === 0
+                    ? 'No hay datos de alumnos sincronizados.'
+                    : 'No se encontraron alumnos con los criterios de búsqueda.'}
+                </Text>
+                {alumnos.length > 0 && (
+                  <TouchableOpacity
+                    style={styles.botonVerTodosVacio}
+                    onPress={() => {
+                      setAlumnoFiltroLegajo(null);
+                      setBusquedaTexto('');
+                    }}
+                  >
+                    <Text style={styles.botonVerTodosVacioTexto}>Mostrar todos los alumnos</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             ) : (
-              alumnos.map((a) => (
+              alumnosFiltrados.map((a) => (
                 <View key={a.id} style={styles.tarjeta}>
                   <Text style={styles.tarjetaTitulo}>{a.nombre}</Text>
                   <Text style={styles.tarjetaMeta}>
                     Legajo: {a.legajo} · Curso: {a.curso || 'Sin curso'}
+                    {a.dni ? ` · DNI: ${a.dni}` : ''}
                   </Text>
 
                   <View style={styles.separador} />
@@ -527,5 +623,65 @@ const styles = StyleSheet.create({
   vacioTexto: {
     color: '#5B6B80',
     fontSize: 14,
+  },
+  contenedorFiltrosOffline: {
+    marginBottom: 10,
+  },
+  buscadorDirectoCaja: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: '#DCE5F0',
+    height: 42,
+    marginTop: 6,
+  },
+  buscadorDirectoLupa: {
+    fontSize: 15,
+    marginRight: 8,
+  },
+  buscadorDirectoInput: {
+    flex: 1,
+    fontSize: 13,
+    color: '#0F2A4D',
+  },
+  limpiarBusquedaBtn: {
+    padding: 4,
+  },
+  limpiarBusquedaBtnTexto: {
+    color: '#8E9DAE',
+    fontSize: 13,
+  },
+  barraResumenFiltro: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  textoResumenFiltro: {
+    fontSize: 12,
+    color: '#5B6B80',
+    fontWeight: '600',
+  },
+  enlaceRestablecerFiltros: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0B4DA8',
+  },
+  botonVerTodosVacio: {
+    marginTop: 12,
+    backgroundColor: '#EAF4FD',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+  },
+  botonVerTodosVacioTexto: {
+    color: '#0B4DA8',
+    fontWeight: '700',
+    fontSize: 13,
   },
 });

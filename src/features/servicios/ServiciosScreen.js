@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../../auth/AuthContext';
 import { EncabezadoPantalla } from '../../components/ui';
+import SelectorAlumno from '../../components/SelectorAlumno';
 import {
   actualizarComedor,
   actualizarTransporte,
@@ -23,7 +24,8 @@ import {
   inscribirDeporte,
 } from './serviciosApi';
 
-export default function ServiciosScreen({ navigation }) {
+export default function ServiciosScreen({ navigation, route }) {
+  const paramLegajo = route?.params?.legajo || null;
   const { sesion } = useAuth();
   const token = sesion?.access;
 
@@ -54,14 +56,19 @@ export default function ServiciosScreen({ navigation }) {
       const resp = await getAlumnos(token);
       if (resp.ok && Array.isArray(resp.datos)) {
         setAlumnos(resp.datos);
-        if (resp.datos.length > 0 && !alumnoSeleccionado) {
+        const match = paramLegajo
+          ? resp.datos.find((a) => a.legajo === paramLegajo || a.id === paramLegajo)
+          : null;
+        if (match) {
+          setAlumnoSeleccionado(match);
+        } else if (resp.datos.length > 0 && !alumnoSeleccionado) {
           setAlumnoSeleccionado(resp.datos[0]);
         }
       }
     } catch {
       // Error manejado
     }
-  }, [token, alumnoSeleccionado]);
+  }, [token, alumnoSeleccionado, paramLegajo]);
 
   // Cargar catálogo de deportes y recorridos
   const cargarCatalogos = useCallback(async () => {
@@ -281,30 +288,16 @@ export default function ServiciosScreen({ navigation }) {
         contentContainerStyle={styles.scrollContenido}
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={onRefresh} colors={['#0B4DA8']} />}
       >
-        {/* Selector de alumno si hay más de 1 */}
+        {/* Selector y buscador inteligente de alumno (igual a Cuotas y Deuda) */}
         {alumnos.length > 0 && (
-          <View style={styles.seccionSelector}>
-            <Text style={styles.seccionLabel}>Seleccionar Alumno/Hijo:</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pillsScroll}>
-              {alumnos.map((alum) => {
-                const esActivo = alumnoSeleccionado?.id === alum.id;
-                return (
-                  <TouchableOpacity
-                    key={alum.id}
-                    style={[styles.alumnoPill, esActivo && styles.alumnoPillActiva]}
-                    onPress={() => setAlumnoSeleccionado(alum)}
-                  >
-                    <Text style={[styles.alumnoPillTexto, esActivo && styles.alumnoPillTextoActiva]}>
-                      {alum.nombre} {alum.apellido}
-                    </Text>
-                    <Text style={[styles.alumnoPillSub, esActivo && styles.alumnoPillSubActiva]}>
-                      Leg. {alum.legajo} · {alum.curso}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-          </View>
+          <SelectorAlumno
+            alumnos={alumnos}
+            seleccionado={alumnoSeleccionado?.legajo || alumnoSeleccionado?.id}
+            onSeleccionar={(legajo) => {
+              const alum = alumnos.find((a) => a.legajo === legajo || a.id === legajo);
+              if (alum) setAlumnoSeleccionado(alum);
+            }}
+          />
         )}
 
         {/* SECCIÓN 1: DEPORTES */}
