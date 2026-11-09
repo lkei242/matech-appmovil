@@ -2,10 +2,12 @@
 // Se puede cargar más de un comprobante por factura. El servidor valida el archivo otra vez.
 
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 
+import { Aviso, Boton, Campo, Pantalla, Tarjeta } from '../../components/ui';
 import { mensajeDeError, subirComprobante } from '../../api/pagos';
+import { colores } from '../../theme';
 import { formatoMoneda, importeValido } from '../../utils/formato';
 
 const TAMANO_MAXIMO = 5 * 1024 * 1024; // 5 MB, igual que en el servidor
@@ -64,110 +66,58 @@ export default function ComprobanteScreen({ route }) {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.contenido}>
-      <View style={styles.tarjeta}>
-        <Text style={styles.titulo}>Total de la solicitud</Text>
+    <Pantalla>
+      <Tarjeta>
+        <Text style={styles.etiquetaTotal}>Total de la solicitud</Text>
         <Text style={styles.total}>{formatoMoneda(total)}</Text>
-        <Text style={styles.nota}>Pagá por transferencia bancaria. No se reciben pagos en efectivo.</Text>
-      </View>
+        <Aviso texto="Pagá por transferencia bancaria. No se reciben pagos en efectivo." tono="azul" />
+      </Tarjeta>
 
-      <View style={styles.tarjeta}>
-        <Text style={styles.etiqueta}>Importe transferido</Text>
-        <TextInput
-          style={styles.input}
+      <Tarjeta>
+        <Campo
+          etiqueta="Importe transferido"
           value={importe}
           onChangeText={setImporte}
           keyboardType="decimal-pad"
           placeholder="Ej: 10000,00"
         />
 
-        <TouchableOpacity style={styles.botonSecundario} onPress={elegirArchivo}>
-          <Text style={styles.botonSecundarioTexto}>{archivo ? `Archivo: ${archivo.name}` : 'Elegir comprobante'}</Text>
-        </TouchableOpacity>
+        <Boton
+          texto={archivo ? `Archivo: ${archivo.name}` : 'Elegir comprobante'}
+          variante="secundario"
+          icono={archivo ? 'document-attach-outline' : 'attach-outline'}
+          onPress={elegirArchivo}
+        />
+        <Text style={styles.ayuda}>PDF, PNG o JPG. Máximo 5 MB.</Text>
 
-        <TouchableOpacity
-          style={[styles.boton, enviando && styles.botonDeshabilitado]}
+        <Boton
+          texto={enviando ? 'Enviando…' : 'Enviar comprobante'}
+          icono="paper-plane-outline"
           onPress={enviar}
-          disabled={enviando}
-        >
-          <Text style={styles.botonTexto}>{enviando ? 'Enviando…' : 'Enviar comprobante'}</Text>
-        </TouchableOpacity>
+          cargando={enviando}
+        />
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-        {mensaje ? <Text style={styles.mensaje}>{mensaje}</Text> : null}
-      </View>
-    </ScrollView>
+        {error ? <Aviso texto={error} tono="rosa" /> : null}
+        {mensaje ? <Aviso texto={mensaje} tono="verde" /> : null}
+      </Tarjeta>
+    </Pantalla>
   );
 }
 
 const styles = StyleSheet.create({
-  contenido: {
-    padding: 16,
-    gap: 12,
-    backgroundColor: '#F3F6FA',
-  },
-  tarjeta: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    gap: 10,
-  },
-  titulo: {
-    color: '#0B3D63',
-    fontSize: 16,
+  etiquetaTotal: {
+    color: colores.suave,
+    fontSize: 14,
     fontWeight: '600',
   },
   total: {
-    color: '#0B3D63',
-    fontSize: 24,
-    fontWeight: 'bold',
+    color: colores.tinta,
+    fontSize: 32,
+    fontWeight: '800',
   },
-  etiqueta: {
-    color: '#374151',
-    fontWeight: '600',
-  },
-  nota: {
-    color: '#6B7280',
+  ayuda: {
+    color: colores.suave,
     fontSize: 13,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-  },
-  botonSecundario: {
-    borderWidth: 1,
-    borderColor: '#0B3D63',
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-  },
-  botonSecundarioTexto: {
-    color: '#0B3D63',
-    fontWeight: '600',
-  },
-  boton: {
-    backgroundColor: '#0B3D63',
-    borderRadius: 8,
-    padding: 14,
-    alignItems: 'center',
-  },
-  botonDeshabilitado: {
-    opacity: 0.6,
-  },
-  botonTexto: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  error: {
-    color: '#B91C1C',
-    textAlign: 'center',
-  },
-  mensaje: {
-    color: '#15803D',
     textAlign: 'center',
   },
 });

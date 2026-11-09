@@ -1,10 +1,12 @@
 // Facturas y comprobantes por alumno y período (RF-M07).
 
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { EstadoCargando, EstadoError, EstadoVacio } from '../../components/Estados';
 import SelectorAlumno from '../../components/SelectorAlumno';
+import { Aviso, Boton, Campo, Insignia, Pantalla, Tarjeta } from '../../components/ui';
+import { colores } from '../../theme';
 import { listarAlumnos, listarFacturas, mensajeDeError } from '../../api/pagos';
 import { formatoFecha, formatoMoneda } from '../../utils/formato';
 
@@ -64,111 +66,106 @@ export default function FacturasScreen() {
   if (alumnos.length === 0) return <EstadoVacio mensaje="No hay alumnos asociados a tu cuenta." />;
 
   return (
-    <ScrollView contentContainerStyle={styles.contenido}>
+    <Pantalla>
       <SelectorAlumno alumnos={alumnos} seleccionado={legajo} onSeleccionar={setLegajo} />
 
-      <View style={styles.tarjeta}>
+      <Tarjeta>
         <Text style={styles.etiqueta}>Período (opcional)</Text>
-        <TextInput style={styles.input} value={desde} onChangeText={setDesde} placeholder="Desde: AAAA-MM-DD" autoCapitalize="none" />
-        <TextInput style={styles.input} value={hasta} onChangeText={setHasta} placeholder="Hasta: AAAA-MM-DD" autoCapitalize="none" />
-        <TouchableOpacity style={styles.boton} onPress={buscar} disabled={!legajo}>
-          <Text style={styles.botonTexto}>Buscar</Text>
-        </TouchableOpacity>
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-      </View>
+        <Campo value={desde} onChangeText={setDesde} placeholder="Desde: AAAA-MM-DD" autoCapitalize="none" />
+        <Campo value={hasta} onChangeText={setHasta} placeholder="Hasta: AAAA-MM-DD" autoCapitalize="none" />
+        <Boton texto="Buscar" icono="search" onPress={buscar} deshabilitado={!legajo} />
+        {error ? <Aviso texto={error} tono="rosa" /> : null}
+      </Tarjeta>
 
-      {!legajo ? <EstadoVacio mensaje="Elegí un alumno para ver sus facturas." /> : null}
+      {!legajo ? <EstadoVacio mensaje="Elegí un alumno para ver sus facturas." icono="people-outline" /> : null}
       {legajo && estado === 'cargando' ? <EstadoCargando /> : null}
       {legajo && buscado && estado === 'listo' && facturas.length === 0 ? (
         <EstadoVacio mensaje="No hay facturas en ese período." />
       ) : null}
 
       {legajo && estado === 'listo' && facturas.map((factura) => (
-        <View key={factura.id} style={styles.tarjeta}>
+        <Tarjeta key={factura.id}>
           <View style={styles.filaTitulo}>
             <Text style={styles.titulo}>Período {factura.periodo}</Text>
             <Text style={styles.total}>{formatoMoneda(factura.total)}</Text>
           </View>
+          <Insignia texto={factura.estado} tono={tonoEstado(factura.estado)} />
           <Text style={styles.dato}>Emitida el {formatoFecha(factura.emision)} · vence {formatoFecha(factura.vencimiento)}</Text>
-          <Text style={styles.dato}>Estado: {factura.estado} · pagado {formatoMoneda(factura.pagado)}</Text>
+          <Text style={styles.dato}>Pagado {formatoMoneda(factura.pagado)}</Text>
 
-          <Text style={styles.subtitulo}>Comprobantes</Text>
-          {factura.comprobantes.length === 0 ? (
-            <Text style={styles.dato}>Sin comprobantes cargados.</Text>
-          ) : (
-            factura.comprobantes.map((c) => (
-              <View key={c.id} style={styles.fila}>
-                <Text style={styles.dato}>{formatoFecha(c.fecha_carga)} · {formatoMoneda(c.importe)}</Text>
-                <Text style={styles.dato}>{c.estado}</Text>
-              </View>
-            ))
-          )}
-        </View>
+          <View style={styles.comprobantes}>
+            <Text style={styles.subtitulo}>Comprobantes</Text>
+            {factura.comprobantes.length === 0 ? (
+              <Text style={styles.dato}>Sin comprobantes cargados.</Text>
+            ) : (
+              factura.comprobantes.map((c) => (
+                <View key={c.id} style={styles.fila}>
+                  <Text style={[styles.dato, styles.filaTexto]}>{formatoFecha(c.fecha_carga)} · {formatoMoneda(c.importe)}</Text>
+                  <Insignia texto={c.estado} tono={tonoEstado(c.estado)} />
+                </View>
+              ))
+            )}
+          </View>
+        </Tarjeta>
       ))}
-    </ScrollView>
+    </Pantalla>
   );
 }
 
+// Color de la insignia según el estado (factura o comprobante).
+function tonoEstado(estado) {
+  const e = String(estado || '').toLowerCase();
+  if (e.includes('pag') || e.includes('aprob')) return 'verde';
+  if (e.includes('rechaz') || e.includes('venc')) return 'rosa';
+  return 'naranja';
+}
+
 const styles = StyleSheet.create({
-  contenido: {
-    padding: 16,
-    gap: 12,
-    backgroundColor: '#F3F6FA',
-  },
-  tarjeta: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    gap: 6,
-  },
   etiqueta: {
-    color: '#374151',
-    fontWeight: '600',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 8,
-    padding: 10,
+    color: colores.tinta,
     fontSize: 15,
-  },
-  boton: {
-    backgroundColor: '#0B3D63',
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-  },
-  botonTexto: {
-    color: '#fff',
-    fontWeight: '600',
+    fontWeight: '700',
   },
   filaTitulo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
   },
   titulo: {
-    color: '#0B3D63',
-    fontSize: 16,
-    fontWeight: '600',
+    flexShrink: 1,
+    color: colores.tinta,
+    fontSize: 17,
+    fontWeight: '700',
   },
   total: {
-    color: '#0B3D63',
-    fontWeight: 'bold',
-  },
-  subtitulo: {
-    color: '#0B3D63',
-    fontWeight: '600',
-    marginTop: 6,
+    color: colores.tinta,
+    fontSize: 17,
+    fontWeight: '800',
   },
   dato: {
-    color: '#4B5563',
+    color: colores.suave,
     fontSize: 14,
+  },
+  comprobantes: {
+    marginTop: 6,
+    paddingTop: 10,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colores.borde,
+    gap: 8,
+  },
+  subtitulo: {
+    color: colores.tinta,
+    fontSize: 14,
+    fontWeight: '700',
   },
   fila: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
   },
-  error: {
-    color: '#B91C1C',
+  filaTexto: {
+    flex: 1,
   },
 });

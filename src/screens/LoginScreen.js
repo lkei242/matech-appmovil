@@ -1,22 +1,28 @@
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 
 import { useAuth } from '../auth/AuthContext';
 import { apiRecuperarContrasena } from '../api';
+import { Aviso, Boton, FranjaLogo, Icono } from '../components/ui';
+import { colores, radio } from '../theme';
+
+const LOGO = require('../../assets/logo.png');
 
 export default function LoginScreen() {
   const { login } = useAuth();
   const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
+  const [verPassword, setVerPassword] = useState(false);
   const [recuperando, setRecuperando] = useState(false);
   const [correo, setCorreo] = useState('');
   const [cargando, setCargando] = useState(false);
@@ -68,71 +74,93 @@ export default function LoginScreen() {
       style={styles.pantalla}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.caja}>
-        <Text style={styles.titulo}>Educar para Transformar</Text>
-        <Text style={styles.subtitulo}>App móvil</Text>
+      <ScrollView contentContainerStyle={styles.contenido} keyboardShouldPersistTaps="handled">
+        <View style={styles.marca}>
+          <View style={styles.logoCaja}>
+            <Image source={LOGO} style={styles.logo} resizeMode="contain" accessibilityLabel="Educar para Transformar" />
+          </View>
+          <Text style={styles.titulo}>Educar para Transformar</Text>
+          <Text style={styles.subtitulo}>App móvil del centro educativo</Text>
+          <FranjaLogo estilo={styles.franja} />
+        </View>
 
-        {!recuperando ? (
-          <>
-            <TextInput
-              style={styles.input}
-              placeholder="Usuario"
-              autoCapitalize="none"
-              value={usuario}
-              onChangeText={setUsuario}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Contraseña"
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-            />
-            <TouchableOpacity
-              style={[styles.boton, cargando && styles.botonDeshabilitado]}
-              onPress={ingresar}
-              disabled={cargando}
-            >
-              {cargando ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.botonTexto}>Ingresar</Text>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setRecuperando(true)}>
-              <Text style={styles.enlace}>¿Olvidaste tu contraseña?</Text>
-            </TouchableOpacity>
-          </>
-        ) : (
-          <>
-            <TextInput
-              style={styles.input}
-              placeholder="Correo electrónico"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              value={correo}
-              onChangeText={setCorreo}
-            />
-            <TouchableOpacity
-              style={[styles.boton, cargando && styles.botonDeshabilitado]}
-              onPress={recuperar}
-              disabled={cargando}
-            >
-              {cargando ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.botonTexto}>Recuperar contraseña</Text>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setRecuperando(false)}>
-              <Text style={styles.enlace}>Volver al inicio de sesión</Text>
-            </TouchableOpacity>
-          </>
-        )}
+        <View style={styles.caja}>
+          <Text style={styles.cajaTitulo}>{recuperando ? 'Recuperar contraseña' : 'Iniciar sesión'}</Text>
+          <Text style={styles.cajaDesc}>
+            {recuperando
+              ? 'Ingresá tu correo y te enviamos las instrucciones.'
+              : 'Ingresá con tu usuario y contraseña.'}
+          </Text>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-        {mensaje ? <Text style={styles.mensaje}>{mensaje}</Text> : null}
-      </View>
+          {!recuperando ? (
+            <>
+              <View style={styles.campo}>
+                <Icono nombre="person-outline" tamano={20} color={colores.suave} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Usuario"
+                  placeholderTextColor="#8A99AB"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  value={usuario}
+                  onChangeText={setUsuario}
+                  accessibilityLabel="Usuario"
+                />
+              </View>
+              <View style={styles.campo}>
+                <Icono nombre="lock-closed-outline" tamano={20} color={colores.suave} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Contraseña"
+                  placeholderTextColor="#8A99AB"
+                  secureTextEntry={!verPassword}
+                  autoCapitalize="none"
+                  value={password}
+                  onChangeText={setPassword}
+                  onSubmitEditing={ingresar}
+                  accessibilityLabel="Contraseña"
+                />
+                <Pressable
+                  onPress={() => setVerPassword((v) => !v)}
+                  hitSlop={10}
+                  accessibilityRole="button"
+                  accessibilityLabel={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  <Icono nombre={verPassword ? 'eye-off-outline' : 'eye-outline'} tamano={20} color={colores.suave} />
+                </Pressable>
+              </View>
+
+              <Boton texto="Ingresar" onPress={ingresar} cargando={cargando} estilo={styles.boton} />
+              <Pressable onPress={() => setRecuperando(true)} accessibilityRole="button">
+                <Text style={styles.enlace}>¿Olvidaste tu contraseña?</Text>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <View style={styles.campo}>
+                <Icono nombre="mail-outline" tamano={20} color={colores.suave} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Correo electrónico"
+                  placeholderTextColor="#8A99AB"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  value={correo}
+                  onChangeText={setCorreo}
+                  accessibilityLabel="Correo electrónico"
+                />
+              </View>
+              <Boton texto="Recuperar contraseña" onPress={recuperar} cargando={cargando} estilo={styles.boton} />
+              <Pressable onPress={() => setRecuperando(false)} accessibilityRole="button">
+                <Text style={styles.enlace}>Volver al inicio de sesión</Text>
+              </Pressable>
+            </>
+          )}
+
+          {error ? <Aviso texto={error} tono="rosa" /> : null}
+          {mensaje ? <Aviso texto={mensaje} tono="verde" /> : null}
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -140,68 +168,88 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   pantalla: {
     flex: 1,
-    backgroundColor: '#E6F4FE',
-    justifyContent: 'center',
-    padding: 24,
+    backgroundColor: colores.azul,
   },
-  caja: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+  contenido: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 22,
+    gap: 22,
+  },
+  marca: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  logoCaja: {
+    width: 96,
+    height: 96,
+    borderRadius: 28,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    marginBottom: 8,
+  },
+  logo: {
+    width: '100%',
+    height: '100%',
   },
   titulo: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#0B3D63',
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: '800',
     textAlign: 'center',
   },
   subtitulo: {
+    color: '#CFE3F8',
     fontSize: 14,
-    color: '#6B7280',
     textAlign: 'center',
-    marginBottom: 20,
+  },
+  franja: {
+    width: 120,
+    marginTop: 12,
+  },
+  caja: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 22,
+    gap: 14,
+  },
+  cajaTitulo: {
+    color: colores.tinta,
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  cajaDesc: {
+    color: colores.suave,
+    fontSize: 14,
+    marginTop: -8,
+  },
+  campo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    minHeight: 52,
+    paddingHorizontal: 14,
+    borderWidth: 1.5,
+    borderColor: '#C3D1E0',
+    borderRadius: radio.md,
+    backgroundColor: '#FFFFFF',
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
+    flex: 1,
+    paddingVertical: 10,
     fontSize: 16,
+    color: colores.tinta,
   },
   boton: {
-    backgroundColor: '#0B3D63',
-    borderRadius: 8,
-    padding: 14,
-    alignItems: 'center',
     marginTop: 4,
   },
-  botonDeshabilitado: {
-    opacity: 0.6,
-  },
-  botonTexto: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
   enlace: {
-    color: '#0B3D63',
+    color: colores.azul,
     textAlign: 'center',
-    marginTop: 16,
-    fontSize: 14,
-  },
-  error: {
-    color: '#B91C1C',
-    textAlign: 'center',
-    marginTop: 14,
-  },
-  mensaje: {
-    color: '#15803D',
-    textAlign: 'center',
-    marginTop: 14,
+    fontSize: 15,
+    fontWeight: '600',
+    paddingVertical: 4,
   },
 });

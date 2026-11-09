@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../../auth/AuthContext';
 import { obtenerCopiaOffline, sincronizarDatosOffline } from './offlineStorage';
+import { EncabezadoPantalla } from '../../components/ui';
 
 function formatearFechaHora(isoString) {
   if (!isoString) return 'Nunca sincronizado';
@@ -89,7 +90,7 @@ export default function OfflineScreen({ navigation }) {
   if (cargando) {
     return (
       <View style={styles.pantallaCentrada}>
-        <ActivityIndicator size="large" color="#1D66C2" />
+        <ActivityIndicator size="large" color="#0B4DA8" />
         <Text style={styles.cargandoTexto}>Cargando datos offline...</Text>
       </View>
     );
@@ -103,18 +104,11 @@ export default function OfflineScreen({ navigation }) {
 
   return (
     <View style={styles.contenedor}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.botonVolver}
-          onPress={() => navigation.goBack()}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Text style={styles.botonVolverTexto}>‹ Volver</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitulo}>Consulta Offline</Text>
-        <Text style={styles.headerSubtitulo}>Datos disponibles sin conexión (RF-M17)</Text>
-      </View>
+      <EncabezadoPantalla
+        titulo="Consulta Offline"
+        subtitulo="Datos disponibles sin conexión"
+        onVolver={() => navigation.goBack()}
+      />
 
       {/* Barra de estado de sincronización */}
       <View style={styles.barraSync}>
@@ -165,7 +159,7 @@ export default function OfflineScreen({ navigation }) {
           onPress={() => setPestañaActiva('servicios')}
         >
           <Text style={[styles.tabTexto, pestañaActiva === 'servicios' && styles.tabTextoActivo]}>
-            👨‍👩‍👧 Alumnos
+            Alumnos
           </Text>
         </TouchableOpacity>
 
@@ -174,7 +168,7 @@ export default function OfflineScreen({ navigation }) {
           onPress={() => setPestañaActiva('deportes')}
         >
           <Text style={[styles.tabTexto, pestañaActiva === 'deportes' && styles.tabTextoActivo]}>
-            🏃 Horarios
+            Horarios
           </Text>
         </TouchableOpacity>
 
@@ -183,7 +177,7 @@ export default function OfflineScreen({ navigation }) {
           onPress={() => setPestañaActiva('transporte')}
         >
           <Text style={[styles.tabTexto, pestañaActiva === 'transporte' && styles.tabTextoActivo]}>
-            🚌 Rutas
+            Rutas
           </Text>
         </TouchableOpacity>
 
@@ -192,14 +186,14 @@ export default function OfflineScreen({ navigation }) {
           onPress={() => setPestañaActiva('comunicados')}
         >
           <Text style={[styles.tabTexto, pestañaActiva === 'comunicados' && styles.tabTextoActivo]}>
-            📢 Noticias
+            Noticias
           </Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView
         contentContainerStyle={styles.scrollContenido}
-        refreshControl={<RefreshControl refreshing={sincronizando} onRefresh={sincronizar} colors={['#1D66C2']} />}
+        refreshControl={<RefreshControl refreshing={sincronizando} onRefresh={sincronizar} colors={['#0B4DA8']} />}
       >
         {/* PESTAÑA: ALUMNOS Y SERVICIOS */}
         {pestañaActiva === 'servicios' && (
@@ -219,7 +213,7 @@ export default function OfflineScreen({ navigation }) {
 
                   <View style={styles.separador} />
 
-                  <Text style={styles.subTituloCampo}>🏃 Deportes:</Text>
+                  <Text style={styles.subTituloCampo}>Deportes:</Text>
                   {a.deportes && a.deportes.length > 0 ? (
                     a.deportes.map((d, idx) => (
                       <View key={idx} style={styles.itemDetalle}>
@@ -235,7 +229,7 @@ export default function OfflineScreen({ navigation }) {
 
                   <View style={styles.separador} />
 
-                  <Text style={styles.subTituloCampo}>🚌 Transporte Escolar:</Text>
+                  <Text style={styles.subTituloCampo}>Transporte Escolar:</Text>
                   {a.transporte ? (
                     <View style={styles.itemDetalle}>
                       <Text style={styles.itemBold}>{a.transporte.nombre}</Text>
@@ -247,7 +241,7 @@ export default function OfflineScreen({ navigation }) {
 
                   <View style={styles.separador} />
 
-                  <Text style={styles.subTituloCampo}>🍽️ Comedor Escolar:</Text>
+                  <Text style={styles.subTituloCampo}>Comedor Escolar:</Text>
                   <Text style={a.comedor ? styles.comedorActivo : styles.itemGris}>
                     {a.comedor ? '✓ Inscripto al servicio de comedor' : 'No inscripto'}
                   </Text>
@@ -270,7 +264,7 @@ export default function OfflineScreen({ navigation }) {
                 <View key={g.id} style={styles.tarjeta}>
                   <Text style={styles.tarjetaTitulo}>{g.disciplina}</Text>
                   <Text style={styles.horarioDestacado}>
-                    📅 {g.dia_semana} · {g.horario} hs
+                    {g.dia_semana} · {g.horario} hs
                   </Text>
                   <Text style={styles.itemSub}>Nivel: {g.nivel} · Docente: {g.profesor}</Text>
                 </View>
@@ -325,42 +319,18 @@ export default function OfflineScreen({ navigation }) {
 const styles = StyleSheet.create({
   contenedor: {
     flex: 1,
-    backgroundColor: '#F6F9FC',
+    backgroundColor: '#F6F9FD',
   },
   pantallaCentrada: {
     flex: 1,
-    backgroundColor: '#F6F9FC',
+    backgroundColor: '#F6F9FD',
     alignItems: 'center',
     justifyContent: 'center',
   },
   cargandoTexto: {
     marginTop: 12,
-    color: '#344C62',
+    color: '#3A4D66',
     fontSize: 15,
-  },
-  header: {
-    backgroundColor: '#18324B',
-    paddingTop: 54,
-    paddingHorizontal: 20,
-    paddingBottom: 18,
-  },
-  botonVolver: {
-    marginBottom: 8,
-  },
-  botonVolverTexto: {
-    color: '#E8F2FF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  headerTitulo: {
-    color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '700',
-  },
-  headerSubtitulo: {
-    color: '#E8F2FF',
-    fontSize: 13,
-    marginTop: 2,
   },
   barraSync: {
     backgroundColor: '#FFFFFF',
@@ -370,7 +340,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderBottomWidth: 1,
-    borderBottomColor: '#DCE6EF',
+    borderBottomColor: '#DCE5F0',
   },
   syncInfo: {
     flex: 1,
@@ -378,17 +348,17 @@ const styles = StyleSheet.create({
   syncEtiqueta: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#62758A',
+    color: '#5B6B80',
     letterSpacing: 0.5,
   },
   syncFecha: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#18324B',
+    color: '#0F2A4D',
     marginTop: 2,
   },
   botonSync: {
-    backgroundColor: '#1D66C2',
+    backgroundColor: '#0B4DA8',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
@@ -408,9 +378,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   bannerExito: {
-    backgroundColor: '#EDF6E7',
+    backgroundColor: '#F1F8E8',
     borderLeftWidth: 4,
-    borderLeftColor: '#4C7A2E',
+    borderLeftColor: '#3F6B14',
   },
   bannerAlerta: {
     backgroundColor: '#FFFBEB',
@@ -418,28 +388,28 @@ const styles = StyleSheet.create({
     borderLeftColor: '#D97706',
   },
   bannerError: {
-    backgroundColor: '#FCEBF4',
+    backgroundColor: '#FDE8F3',
     borderLeftWidth: 4,
-    borderLeftColor: '#B91D6A',
+    borderLeftColor: '#A10762',
   },
   bannerTexto: {
     fontSize: 13,
     fontWeight: '500',
   },
   bannerTextoExito: {
-    color: '#4C7A2E',
+    color: '#3F6B14',
   },
   bannerTextoAlerta: {
     color: '#B45309',
   },
   bannerTextoError: {
-    color: '#B91D6A',
+    color: '#A10762',
   },
   tabsContainer: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#DCE6EF',
+    borderBottomColor: '#DCE5F0',
     paddingHorizontal: 8,
   },
   tabBoton: {
@@ -450,15 +420,15 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   tabBotonActivo: {
-    borderBottomColor: '#1D66C2',
+    borderBottomColor: '#0B4DA8',
   },
   tabTexto: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#62758A',
+    color: '#5B6B80',
   },
   tabTextoActivo: {
-    color: '#1D66C2',
+    color: '#0B4DA8',
     fontWeight: '700',
   },
   scrollContenido: {
@@ -468,7 +438,7 @@ const styles = StyleSheet.create({
   seccionTitulo: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#18324B',
+    color: '#0F2A4D',
     marginBottom: 12,
   },
   tarjeta: {
@@ -477,8 +447,8 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#DCE6EF',
-    shadowColor: '#18324B',
+    borderColor: '#DCE5F0',
+    shadowColor: '#0F2A4D',
     shadowOpacity: 0.03,
     shadowRadius: 6,
     elevation: 1,
@@ -486,16 +456,16 @@ const styles = StyleSheet.create({
   tarjetaTitulo: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#18324B',
+    color: '#0F2A4D',
   },
   tarjetaMeta: {
     fontSize: 12,
-    color: '#62758A',
+    color: '#5B6B80',
     marginTop: 2,
   },
   tarjetaFecha: {
     fontSize: 12,
-    color: '#1D66C2',
+    color: '#0B4DA8',
     marginTop: 2,
     fontWeight: '600',
   },
@@ -507,7 +477,7 @@ const styles = StyleSheet.create({
   subTituloCampo: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#344C62',
+    color: '#3A4D66',
     marginBottom: 4,
   },
   itemDetalle: {
@@ -516,11 +486,11 @@ const styles = StyleSheet.create({
   itemBold: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#18324B',
+    color: '#0F2A4D',
   },
   itemSub: {
     fontSize: 13,
-    color: '#62758A',
+    color: '#5B6B80',
     marginTop: 2,
     lineHeight: 18,
   },
@@ -531,18 +501,18 @@ const styles = StyleSheet.create({
   },
   horarioDestacado: {
     fontSize: 14,
-    color: '#1D66C2',
+    color: '#0B4DA8',
     fontWeight: '700',
     marginTop: 4,
   },
   comedorActivo: {
     fontSize: 13,
-    color: '#4C7A2E',
+    color: '#3F6B14',
     fontWeight: '600',
   },
   comunicadoCuerpo: {
     fontSize: 14,
-    color: '#344C62',
+    color: '#3A4D66',
     lineHeight: 20,
     marginTop: 6,
   },
@@ -552,10 +522,10 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#DCE6EF',
+    borderColor: '#DCE5F0',
   },
   vacioTexto: {
-    color: '#62758A',
+    color: '#5B6B80',
     fontSize: 14,
   },
 });

@@ -4,6 +4,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 
+import { colores } from './src/theme';
+
 import { AuthProvider, useAuth } from './src/auth/AuthContext';
 import LoginScreen from './src/screens/LoginScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
@@ -32,7 +34,7 @@ function Pantallas() {
   if (cargando) {
     return (
       <View style={styles.cargando}>
-        <ActivityIndicator size="large" color="#1D66C2" />
+        <ActivityIndicator size="large" color={colores.azul} />
       </View>
     );
   }
@@ -48,7 +50,15 @@ function Pantallas() {
                 key={pantalla.name}
                 name={pantalla.name}
                 component={pantalla.component}
-                options={{ headerShown: true, title: pantalla.title, headerTintColor: '#18324B' }}
+                options={{
+                  headerShown: true,
+                  title: pantalla.title,
+                  headerStyle: { backgroundColor: colores.azul },
+                  headerTintColor: '#FFFFFF',
+                  headerTitleStyle: { fontWeight: '700' },
+                  headerShadowVisible: false,
+                  contentStyle: { backgroundColor: colores.fondo },
+                }}
               />
             ))}
             <Stack.Screen name="Servicios" component={ServiciosScreen} />
@@ -75,7 +85,7 @@ export default function App() {
 const styles = StyleSheet.create({
   cargando: {
     flex: 1,
-    backgroundColor: '#F6F9FC',
+    backgroundColor: colores.fondo,
     alignItems: 'center',
     justifyContent: 'center',
   },

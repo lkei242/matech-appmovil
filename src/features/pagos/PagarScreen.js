@@ -5,10 +5,12 @@
 // Nada aparece como acreditado hasta que la administración aprueba el comprobante.
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { EstadoCargando, EstadoError, EstadoVacio } from '../../components/Estados';
 import SelectorAlumno from '../../components/SelectorAlumno';
+import { Aviso, Boton, Icono, Pantalla, Tarjeta } from '../../components/ui';
+import { colores } from '../../theme';
 import {
   crearSolicitudPago,
   listarAlumnos,
@@ -122,149 +124,191 @@ export default function PagarScreen({ navigation }) {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.contenido}>
-      <Text style={styles.paso}>1. Alumno</Text>
+    <Pantalla>
+      <Paso numero={1} titulo="Alumno" />
       <SelectorAlumno alumnos={alumnos} seleccionado={legajo} onSeleccionar={setLegajo} />
 
       {legajo && estado === 'cargando' ? <EstadoCargando /> : null}
       {legajo && estado === 'listo' && facturas.length === 0 ? (
-        <EstadoVacio mensaje="No hay facturas con saldo pendiente para este alumno." />
+        <EstadoVacio mensaje="No hay facturas con saldo pendiente para este alumno." icono="checkmark-circle-outline" />
       ) : null}
 
       {legajo && facturas.length > 0 ? (
         <>
-          <Text style={styles.paso}>2. Factura</Text>
-          {facturas.map((f) => (
-            <Pressable
-              key={f.id}
-              onPress={() => elegirFactura(f.id)}
-              style={[styles.tarjeta, factura && factura.id === f.id && styles.tarjetaActiva]}
-              accessibilityRole="button"
-            >
-              <Text style={styles.titulo}>Período {f.periodo}</Text>
-              <Text style={styles.dato}>Saldo {formatoMoneda(f.saldo)} · vence {formatoFecha(f.vencimiento)}</Text>
-            </Pressable>
-          ))}
+          <Paso numero={2} titulo="Factura" />
+          {facturas.map((f) => {
+            const activa = factura && factura.id === f.id;
+            return (
+              <Tarjeta key={f.id} onPress={() => elegirFactura(f.id)} acento={activa ? colores.azul : undefined}>
+                <View style={styles.filaFactura}>
+                  <View style={styles.facturaTextos}>
+                    <Text style={styles.titulo}>Período {f.periodo}</Text>
+                    <Text style={styles.dato}>Saldo {formatoMoneda(f.saldo)} · vence {formatoFecha(f.vencimiento)}</Text>
+                  </View>
+                  <Icono
+                    nombre={activa ? 'radio-button-on' : 'radio-button-off'}
+                    tamano={24}
+                    color={activa ? colores.azul : colores.suave}
+                  />
+                </View>
+              </Tarjeta>
+            );
+          })}
         </>
       ) : null}
 
       {factura ? (
         <>
-          <Text style={styles.paso}>3. Qué querés pagar</Text>
-          <View style={styles.tarjeta}>
-            {factura.items.map((item) => (
-              <Pressable key={item.id} onPress={() => alternarItem(item.id)} style={styles.fila} accessibilityRole="checkbox" accessibilityState={{ checked: !!seleccion[item.id] }}>
-                <Text style={styles.item}>{seleccion[item.id] ? '☑' : '☐'} {item.descripcion}</Text>
-                <Text style={styles.item}>{formatoMoneda(item.importe)}</Text>
-              </Pressable>
-            ))}
+          <Paso numero={3} titulo="Qué querés pagar" />
+          <Tarjeta>
+            {factura.items.map((item) => {
+              const marcado = !!seleccion[item.id];
+              return (
+                <Pressable
+                  key={item.id}
+                  onPress={() => alternarItem(item.id)}
+                  style={styles.fila}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: marcado }}
+                >
+                  <Icono
+                    nombre={marcado ? 'checkbox' : 'square-outline'}
+                    tamano={24}
+                    color={marcado ? colores.azul : colores.suave}
+                  />
+                  <Text style={[styles.item, styles.itemTexto]}>{item.descripcion}</Text>
+                  <Text style={styles.itemMonto}>{formatoMoneda(item.importe)}</Text>
+                </Pressable>
+              );
+            })}
             <View style={styles.filaTotal}>
               <Text style={styles.titulo}>Total a pagar</Text>
               <Text style={styles.total}>{formatoMoneda(totalVistaPrevia)}</Text>
             </View>
             <Text style={styles.nota}>El total final lo confirma el servidor al generar la solicitud.</Text>
-          </View>
+          </Tarjeta>
 
           {!solicitud ? (
-            <TouchableOpacity
-              style={[styles.boton, estado === 'enviando' && styles.botonDeshabilitado]}
+            <Boton
+              texto={estado === 'enviando' ? 'Generando…' : 'Generar solicitud de pago'}
+              variante="accion"
+              icono="receipt-outline"
               onPress={generarSolicitud}
-              disabled={estado === 'enviando'}
-            >
-              <Text style={styles.botonTexto}>{estado === 'enviando' ? 'Generando…' : 'Generar solicitud de pago'}</Text>
-            </TouchableOpacity>
+              deshabilitado={estado === 'enviando'}
+            />
           ) : (
-            <View style={styles.tarjeta}>
-              <Text style={styles.titulo}>Solicitud N.º {solicitud.id}</Text>
+            <Tarjeta acento={colores.verde}>
+              <View style={styles.filaFactura}>
+                <Icono nombre="checkmark-circle" tamano={22} color={colores.verdeTexto} />
+                <Text style={[styles.titulo, styles.facturaTextos]}>Solicitud N.º {solicitud.id}</Text>
+              </View>
               <Text style={styles.total}>{formatoMoneda(solicitud.total)}</Text>
               <Text style={styles.nota}>{solicitud.aviso}</Text>
-              <TouchableOpacity
-                style={styles.boton}
+              <Boton
+                texto="Cargar comprobante de transferencia"
+                icono="cloud-upload-outline"
                 onPress={() => navigation.navigate('Comprobante', { factura: factura.id, total: solicitud.total })}
-              >
-                <Text style={styles.botonTexto}>Cargar comprobante de transferencia</Text>
-              </TouchableOpacity>
-            </View>
+              />
+            </Tarjeta>
           )}
         </>
       ) : null}
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-    </ScrollView>
+      {error ? <Aviso texto={error} tono="rosa" /> : null}
+    </Pantalla>
+  );
+}
+
+// Encabezado numerado de cada paso del pago.
+function Paso({ numero, titulo }) {
+  return (
+    <View style={styles.paso}>
+      <View style={styles.pasoNumero}>
+        <Text style={styles.pasoNumeroTexto}>{numero}</Text>
+      </View>
+      <Text style={styles.pasoTitulo}>{titulo}</Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  contenido: {
-    padding: 16,
-    gap: 12,
-    backgroundColor: '#F3F6FA',
-  },
   paso: {
-    color: '#0B3D63',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 6,
   },
-  tarjeta: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: 'transparent',
+  pasoNumero: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colores.azul,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  tarjetaActiva: {
-    borderColor: '#0B3D63',
+  pasoNumeroTexto: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  pasoTitulo: {
+    color: colores.tinta,
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  filaFactura: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  facturaTextos: {
+    flex: 1,
   },
   titulo: {
-    color: '#0B3D63',
+    color: colores.tinta,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   dato: {
-    color: '#4B5563',
+    color: colores.suave,
+    fontSize: 14,
+    marginTop: 2,
   },
   fila: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 6,
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 8,
   },
   item: {
-    color: '#374151',
+    color: colores.texto,
+    fontSize: 15,
+  },
+  itemTexto: {
+    flex: 1,
+  },
+  itemMonto: {
+    color: colores.tinta,
+    fontSize: 15,
+    fontWeight: '700',
   },
   filaTotal: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    paddingTop: 10,
+    alignItems: 'center',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colores.borde,
+    paddingTop: 12,
+    marginTop: 4,
   },
   total: {
-    color: '#0B3D63',
-    fontSize: 22,
-    fontWeight: 'bold',
+    color: colores.tinta,
+    fontSize: 24,
+    fontWeight: '800',
   },
   nota: {
-    color: '#6B7280',
+    color: colores.suave,
     fontSize: 13,
-  },
-  boton: {
-    backgroundColor: '#0B3D63',
-    borderRadius: 8,
-    padding: 14,
-    alignItems: 'center',
-  },
-  botonDeshabilitado: {
-    opacity: 0.6,
-  },
-  botonTexto: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  error: {
-    color: '#B91C1C',
-    textAlign: 'center',
+    lineHeight: 18,
   },
 });

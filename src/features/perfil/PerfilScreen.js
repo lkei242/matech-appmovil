@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../../auth/AuthContext';
 import { getPerfil, updatePerfil } from './perfilApi';
+import { EncabezadoPantalla } from '../../components/ui';
 
 const ROLES_ETIQUETAS = {
   padre: 'Tutor (Padre/Madre)',
@@ -122,7 +123,7 @@ export default function PerfilScreen({ navigation }) {
   if (cargando) {
     return (
       <View style={styles.pantallaCentrada}>
-        <ActivityIndicator size="large" color="#1D66C2" />
+        <ActivityIndicator size="large" color="#0B4DA8" />
         <Text style={styles.cargandoTexto}>Cargando perfil...</Text>
       </View>
     );
@@ -137,22 +138,15 @@ export default function PerfilScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.contenedor}
     >
-      {/* Cabecera */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.botonVolver}
-          onPress={() => navigation.goBack()}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Text style={styles.botonVolverTexto}>‹ Volver</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitulo}>Mi Perfil</Text>
-        <Text style={styles.headerSubtitulo}>Datos de la cuenta y contacto (RF-M18)</Text>
-      </View>
+      <EncabezadoPantalla
+        titulo="Mi Perfil"
+        subtitulo="Datos de la cuenta y contacto"
+        onVolver={() => navigation.goBack()}
+      />
 
       <ScrollView
         contentContainerStyle={styles.scrollContenido}
-        refreshControl={<RefreshControl refreshing={refrescando} onRefresh={onRefresh} colors={['#1D66C2']} />}
+        refreshControl={<RefreshControl refreshing={refrescando} onRefresh={onRefresh} colors={['#0B4DA8']} />}
       >
         {/* Banner Éxito */}
         {mensajeExito ? (
@@ -264,70 +258,46 @@ export default function PerfilScreen({ navigation }) {
 const styles = StyleSheet.create({
   contenedor: {
     flex: 1,
-    backgroundColor: '#F6F9FC',
+    backgroundColor: '#F6F9FD',
   },
   pantallaCentrada: {
     flex: 1,
-    backgroundColor: '#F6F9FC',
+    backgroundColor: '#F6F9FD',
     alignItems: 'center',
     justifyContent: 'center',
   },
   cargandoTexto: {
     marginTop: 12,
-    color: '#344C62',
+    color: '#3A4D66',
     fontSize: 15,
-  },
-  header: {
-    backgroundColor: '#18324B',
-    paddingTop: 54,
-    paddingHorizontal: 20,
-    paddingBottom: 18,
-  },
-  botonVolver: {
-    marginBottom: 8,
-  },
-  botonVolverTexto: {
-    color: '#E8F2FF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  headerTitulo: {
-    color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '700',
-  },
-  headerSubtitulo: {
-    color: '#E8F2FF',
-    fontSize: 13,
-    marginTop: 2,
   },
   scrollContenido: {
     padding: 16,
     paddingBottom: 36,
   },
   bannerExito: {
-    backgroundColor: '#EDF6E7',
+    backgroundColor: '#F1F8E8',
     borderLeftWidth: 4,
-    borderLeftColor: '#4C7A2E',
+    borderLeftColor: '#3F6B14',
     borderRadius: 8,
     padding: 14,
     marginBottom: 16,
   },
   bannerTextoExito: {
-    color: '#4C7A2E',
+    color: '#3F6B14',
     fontSize: 14,
     fontWeight: '600',
   },
   bannerError: {
-    backgroundColor: '#FCEBF4',
+    backgroundColor: '#FDE8F3',
     borderLeftWidth: 4,
-    borderLeftColor: '#B91D6A',
+    borderLeftColor: '#A10762',
     borderRadius: 8,
     padding: 14,
     marginBottom: 16,
   },
   bannerTextoError: {
-    color: '#B91D6A',
+    color: '#A10762',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -337,8 +307,8 @@ const styles = StyleSheet.create({
     padding: 18,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#DCE6EF',
-    shadowColor: '#18324B',
+    borderColor: '#DCE5F0',
+    shadowColor: '#0F2A4D',
     shadowOpacity: 0.04,
     shadowRadius: 8,
     elevation: 2,
@@ -346,11 +316,11 @@ const styles = StyleSheet.create({
   tarjetaTitulo: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#18324B',
+    color: '#0F2A4D',
   },
   tarjetaSub: {
     fontSize: 13,
-    color: '#62758A',
+    color: '#5B6B80',
     marginTop: 2,
     marginBottom: 16,
   },
@@ -360,30 +330,30 @@ const styles = StyleSheet.create({
   etiqueta: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#62758A',
+    color: '#5B6B80',
     textTransform: 'uppercase',
   },
   valorPrincipal: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#18324B',
+    color: '#0F2A4D',
     marginTop: 2,
   },
   valor: {
     fontSize: 15,
-    color: '#344C62',
+    color: '#3A4D66',
     marginTop: 2,
   },
   rolPill: {
     alignSelf: 'flex-start',
-    backgroundColor: '#E8F2FF',
+    backgroundColor: '#EAF4FD',
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 8,
     marginTop: 4,
   },
   rolPillTexto: {
-    color: '#1D66C2',
+    color: '#0B4DA8',
     fontSize: 13,
     fontWeight: '700',
   },
@@ -393,36 +363,36 @@ const styles = StyleSheet.create({
   inputEtiqueta: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#18324B',
+    color: '#0F2A4D',
     marginBottom: 6,
   },
   input: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#DCE6EF',
+    borderColor: '#DCE5F0',
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
-    color: '#18324B',
+    color: '#0F2A4D',
     minHeight: 46,
   },
   inputError: {
-    borderColor: '#B91D6A',
+    borderColor: '#A10762',
     backgroundColor: '#FFF8FA',
   },
   errorTexto: {
-    color: '#B91D6A',
+    color: '#A10762',
     fontSize: 12,
     marginTop: 4,
   },
   ayudaTexto: {
-    color: '#62758A',
+    color: '#5B6B80',
     fontSize: 12,
     marginTop: 4,
   },
   botonGuardar: {
-    backgroundColor: '#1D66C2',
+    backgroundColor: '#0B4DA8',
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
