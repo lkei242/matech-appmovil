@@ -223,6 +223,8 @@ export default function BuscarAlumnosScreen({ navigation }) {
   };
 
   const puedeVerFinanzas = ['administrativo', 'directivo'].includes(rolUsuario);
+  // El docente y el preceptor no ven domicilio ni datos del tutor (igual que en la web).
+  const veContacto = !['docente', 'preceptor'].includes(rolUsuario);
 
   return (
     <SafeAreaView style={styles.pantalla}>
@@ -580,10 +582,12 @@ export default function BuscarAlumnosScreen({ navigation }) {
                       : ''}
                   </Text>
                 </View>
-                <View style={styles.filaDato}>
-                  <Text style={styles.datoEtiqueta}>Domicilio:</Text>
-                  <Text style={styles.datoValor}>{alumnoSeleccionado.direccion || 'No registrado'}</Text>
-                </View>
+                {veContacto && (
+                  <View style={styles.filaDato}>
+                    <Text style={styles.datoEtiqueta}>Domicilio:</Text>
+                    <Text style={styles.datoValor}>{alumnoSeleccionado.direccion || 'No registrado'}</Text>
+                  </View>
+                )}
                 {alumnoSeleccionado.telefono ? (
                   <View style={styles.filaDato}>
                     <Text style={styles.datoEtiqueta}>Teléfono Alumno:</Text>
@@ -599,53 +603,55 @@ export default function BuscarAlumnosScreen({ navigation }) {
               </View>
 
               {/* Sección: Tutor / Familiar a Cargo */}
-              <View style={styles.seccionFicha}>
-                <Text style={styles.seccionFichaTitulo}>Tutor / Contacto de Emergencia</Text>
-                {alumnoSeleccionado.tutor ? (
-                  <>
-                    <View style={styles.filaDato}>
-                      <Text style={styles.datoEtiqueta}>Nombre del Tutor:</Text>
-                      <Text style={styles.datoValor}>{alumnoSeleccionado.tutor.nombre}</Text>
-                    </View>
-                    <View style={styles.filaDato}>
-                      <Text style={styles.datoEtiqueta}>Parentesco:</Text>
-                      <Text style={styles.datoValor}>{alumnoSeleccionado.tutor.parentesco}</Text>
-                    </View>
-                    <View style={styles.filaDato}>
-                      <Text style={styles.datoEtiqueta}>Teléfono de contacto:</Text>
-                      <Text style={styles.datoValor}>{alumnoSeleccionado.tutor.telefono || 'Sin teléfono'}</Text>
-                    </View>
-                    <View style={styles.filaDato}>
-                      <Text style={styles.datoEtiqueta}>Correo de contacto:</Text>
-                      <Text style={styles.datoValor}>{alumnoSeleccionado.tutor.email || 'Sin correo'}</Text>
-                    </View>
+              {veContacto && (
+                <View style={styles.seccionFicha}>
+                  <Text style={styles.seccionFichaTitulo}>Tutor / Contacto de Emergencia</Text>
+                  {alumnoSeleccionado.tutor ? (
+                    <>
+                      <View style={styles.filaDato}>
+                        <Text style={styles.datoEtiqueta}>Nombre del Tutor:</Text>
+                        <Text style={styles.datoValor}>{alumnoSeleccionado.tutor.nombre}</Text>
+                      </View>
+                      <View style={styles.filaDato}>
+                        <Text style={styles.datoEtiqueta}>Parentesco:</Text>
+                        <Text style={styles.datoValor}>{alumnoSeleccionado.tutor.parentesco}</Text>
+                      </View>
+                      <View style={styles.filaDato}>
+                        <Text style={styles.datoEtiqueta}>Teléfono de contacto:</Text>
+                        <Text style={styles.datoValor}>{alumnoSeleccionado.tutor.telefono || 'Sin teléfono'}</Text>
+                      </View>
+                      <View style={styles.filaDato}>
+                        <Text style={styles.datoEtiqueta}>Correo de contacto:</Text>
+                        <Text style={styles.datoValor}>{alumnoSeleccionado.tutor.email || 'Sin correo'}</Text>
+                      </View>
 
-                    {/* Botones de acción directa con el tutor */}
-                    <View style={styles.filaBotonesContacto}>
-                      {alumnoSeleccionado.tutor.telefono ? (
-                        <TouchableOpacity
-                          style={styles.botonContacto}
-                          onPress={() => llamarTutor(alumnoSeleccionado.tutor.telefono)}
-                        >
-                          <Text style={styles.botonContactoTexto}>Llamar al Tutor</Text>
-                        </TouchableOpacity>
-                      ) : null}
-                      {alumnoSeleccionado.tutor.email ? (
-                        <TouchableOpacity
-                          style={[styles.botonContacto, styles.botonContactoEmail]}
-                          onPress={() => enviarEmailTutor(alumnoSeleccionado.tutor.email)}
-                        >
-                          <Text style={[styles.botonContactoTexto, styles.botonContactoTextoEmail]}>
-                            Enviar correo
-                          </Text>
-                        </TouchableOpacity>
-                      ) : null}
-                    </View>
-                  </>
-                ) : (
-                  <Text style={styles.sinTutorTexto}>No se encuentra un tutor vinculado registrado en el sistema.</Text>
-                )}
-              </View>
+                      {/* Botones de acción directa con el tutor */}
+                      <View style={styles.filaBotonesContacto}>
+                        {alumnoSeleccionado.tutor.telefono ? (
+                          <TouchableOpacity
+                            style={styles.botonContacto}
+                            onPress={() => llamarTutor(alumnoSeleccionado.tutor.telefono)}
+                          >
+                            <Text style={styles.botonContactoTexto}>Llamar al Tutor</Text>
+                          </TouchableOpacity>
+                        ) : null}
+                        {alumnoSeleccionado.tutor.email ? (
+                          <TouchableOpacity
+                            style={[styles.botonContacto, styles.botonContactoEmail]}
+                            onPress={() => enviarEmailTutor(alumnoSeleccionado.tutor.email)}
+                          >
+                            <Text style={[styles.botonContactoTexto, styles.botonContactoTextoEmail]}>
+                              Enviar correo
+                            </Text>
+                          </TouchableOpacity>
+                        ) : null}
+                      </View>
+                    </>
+                  ) : (
+                    <Text style={styles.sinTutorTexto}>No se encuentra un tutor vinculado registrado en el sistema.</Text>
+                  )}
+                </View>
+              )}
 
               {/* Sección: Servicios Escolares */}
               <View style={styles.seccionFicha}>
