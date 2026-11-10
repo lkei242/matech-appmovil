@@ -36,6 +36,7 @@ export default function PerfilScreen() {
   const [telefono, setTelefono] = useState('');
 
   const [errorEmail, setErrorEmail] = useState('');
+  const [errorTelefono, setErrorTelefono] = useState('');
   const [mensajeExito, setMensajeExito] = useState('');
   const [mensajeError, setMensajeError] = useState('');
 
@@ -72,14 +73,28 @@ export default function PerfilScreen() {
     setRefrescando(false);
   };
 
+  // Las mismas reglas que valida el servidor, para avisar antes de enviar.
   const validarFormulario = () => {
     let valido = true;
     setErrorEmail('');
+    setErrorTelefono('');
 
     const emailTrim = email.trim();
-    if (emailTrim && (!emailTrim.includes('@') || !emailTrim.includes('.'))) {
+    if (!emailTrim) {
+      setErrorEmail('El correo electrónico no puede quedar vacío.');
+      valido = false;
+    } else if (emailTrim.length > 100 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailTrim)) {
       setErrorEmail('Ingrese una dirección de correo válida (ej: nombre@correo.com)');
       valido = false;
+    }
+
+    const telTrim = telefono.trim();
+    if (telTrim) {
+      const digitos = telTrim.replace(/\D/g, '').length;
+      if (telTrim.length > 20 || !/^\+?[\d\s\-()]+$/.test(telTrim) || digitos < 8 || digitos > 15) {
+        setErrorTelefono('Ingrese un teléfono válido: solo números, espacios, guiones o paréntesis (8 a 15 dígitos).');
+        valido = false;
+      }
     }
 
     return valido;
@@ -206,6 +221,7 @@ export default function PerfilScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              maxLength={100}
               editable={!guardando}
             />
             {errorEmail ? <Text style={styles.errorTexto}>{errorEmail}</Text> : null}
@@ -218,13 +234,18 @@ export default function PerfilScreen() {
           <View style={styles.campoFormulario}>
             <Text style={styles.inputEtiqueta}>Teléfono de Contacto:</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errorTelefono && styles.inputError]}
               value={telefono}
-              onChangeText={setTelefono}
+              onChangeText={(texto) => {
+                setTelefono(texto);
+                if (errorTelefono) setErrorTelefono('');
+              }}
               placeholder="Ej: 11 5555-8888"
               keyboardType="phone-pad"
+              maxLength={20}
               editable={!guardando}
             />
+            {errorTelefono ? <Text style={styles.errorTexto}>{errorTelefono}</Text> : null}
             <Text style={styles.ayudaTexto}>
               Para emergencias o avisos urgentes del establecimiento escolar.
             </Text>

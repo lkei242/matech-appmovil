@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -13,21 +13,6 @@ import SelectorAlumno from '../../components/SelectorAlumno';
 import { useAuth } from '../../auth/AuthContext';
 import { obtenerCopiaOffline, sincronizarDatosOffline } from './offlineStorage';
 import { Icono } from '../../components/ui';
-
-function formatearFechaHora(isoString) {
-  if (!isoString) return 'Nunca sincronizado';
-  try {
-    const d = new Date(isoString);
-    const dia = String(d.getDate()).padStart(2, '0');
-    const mes = String(d.getMonth() + 1).padStart(2, '0');
-    const anio = d.getFullYear();
-    const hora = String(d.getHours()).padStart(2, '0');
-    const min = String(d.getMinutes()).padStart(2, '0');
-    return `${dia}/${mes}/${anio} ${hora}:${min} hs`;
-  } catch {
-    return isoString;
-  }
-}
 
 export default function OfflineScreen() {
   const { sesion } = useAuth();
@@ -40,7 +25,6 @@ export default function OfflineScreen() {
   const [pestañaActiva, setPestañaActiva] = useState('servicios');
   const [aviso, setAviso] = useState(null);
   const [alumnoFiltroLegajo, setAlumnoFiltroLegajo] = useState(null);
-  const [busquedaTexto, setBusquedaTexto] = useState('');
 
   const cargarCopiaLocal = useCallback(async () => {
     if (!username) return;
@@ -50,14 +34,18 @@ export default function OfflineScreen() {
     }
   }, [username]);
 
-  const sincronizar = useCallback(async () => {
+  // `manual` es true cuando el usuario desliza para actualizar. Al abrir la pantalla se sincroniza solo
+  // y sin avisos (solo se avisa si algo falla); el pop-up de éxito es únicamente para la actualización manual.
+  const sincronizar = useCallback(async (manual = false) => {
     setSincronizando(true);
     setAviso(null);
     try {
       const res = await sincronizarDatosOffline(token, username);
       if (res.ok) {
         setDatosOffline(res.datos);
-        setAviso({ texto: '¡Datos sincronizados exitosamente!', tipo: 'exito' });
+        if (manual === true) {
+          Alert.alert('Sincronización', '¡Datos sincronizados exitosamente!');
+        }
       } else {
         if (res.local) {
           setDatosOffline(res.local);
@@ -101,25 +89,8 @@ export default function OfflineScreen() {
         (a) => a.legajo === alumnoFiltroLegajo || a.id === alumnoFiltroLegajo
       );
     }
-    const q = busquedaTexto.trim().toLowerCase();
-    if (q) {
-      lista = lista.filter((a) => {
-        const nom = (a.nombre || '').toLowerCase();
-        const leg = String(a.legajo || '').toLowerCase();
-        const dni = String(a.dni || '').toLowerCase();
-        const cur = String(a.curso || '').toLowerCase();
-        const fn = String(a.fecha_nacimiento || '').toLowerCase();
-        return (
-          nom.includes(q) ||
-          leg.includes(q) ||
-          dni.includes(q) ||
-          cur.includes(q) ||
-          fn.includes(q)
-        );
-      });
-    }
     return lista;
-  }, [alumnos, alumnoFiltroLegajo, busquedaTexto]);
+  }, [alumnos, alumnoFiltroLegajo]);
 
   if (cargando) {
     return (
@@ -130,38 +101,17 @@ export default function OfflineScreen() {
     );
   }
 
-  const ultimaSync = datosOffline?.sincronizado_en;
   const catalogoDeportes = datosOffline?.catalogo_deportes || [];
   const catalogoTransporte = datosOffline?.catalogo_transporte || [];
   const comunicados = datosOffline?.comunicados || [];
 
   return (
     <View style={styles.contenedor}>
-      {/* Barra de estado de sincronización */}
-      <View style={styles.barraSync}>
-        <View style={styles.syncInfo}>
-          <Text style={styles.syncEtiqueta}>ÚLTIMA SINCRONIZACIÓN</Text>
-          <Text style={styles.syncFecha}>{formatearFechaHora(ultimaSync)}</Text>
-        </View>
-        <TouchableOpacity
-          style={[styles.botonSync, sincronizando && styles.botonSyncDeshabilitado]}
-          disabled={sincronizando}
-          onPress={sincronizar}
-        >
-          {sincronizando ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
-          ) : (
-            <Text style={styles.botonSyncTexto}>Sincronizar</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-
       {/* Banner de aviso */}
       {aviso && (
         <View
           style={[
             styles.banner,
-            aviso.tipo === 'exito' && styles.bannerExito,
             aviso.tipo === 'alerta' && styles.bannerAlerta,
             aviso.tipo === 'error' && styles.bannerError,
           ]}
@@ -169,7 +119,6 @@ export default function OfflineScreen() {
           <Text
             style={[
               styles.bannerTexto,
-              aviso.tipo === 'exito' && styles.bannerTextoExito,
               aviso.tipo === 'alerta' && styles.bannerTextoAlerta,
               aviso.tipo === 'error' && styles.bannerTextoError,
             ]}
@@ -220,15 +169,15 @@ export default function OfflineScreen() {
 
       <ScrollView
         contentContainerStyle={styles.scrollContenido}
-        refreshControl={<RefreshControl refreshing={sincronizando} onRefresh={sincronizar} colors={['#0B4DA8']} />}
+        refreshControl={<RefreshControl refreshing={sincronizando} onRefresh={() => sincronizar(true)} colors={['#0B4DA8']} />}
       >
         {/* PESTAÑA: ALUMNOS Y SERVICIOS */}
         {pestañaActiva === 'servicios' && (
           <View>
             <Text style={styles.seccionTitulo}>Servicios Activos por Alumno</Text>
 
-            {/* Menú de búsqueda y selector inteligente igual a Cuotas y Deuda */}
-            {alumnos.length > 0 && (
+            {/* Con un solo alumno no hay nada que elegir ni filtrar: el selector y el resumen se ocultan. */}
+            {alumnos.length > 1 && (
               <View style={styles.contenedorFiltrosOffline}>
                 <SelectorAlumno
                   alumnos={alumnos}
@@ -237,34 +186,15 @@ export default function OfflineScreen() {
                   permitirTodos={true}
                 />
 
-                <View style={styles.buscadorDirectoCaja}>
-                  <Icono nombre="search-outline" tamano={20} color="#5B6B80" />
-                  <TextInput
-                    style={styles.buscadorDirectoInput}
-                    placeholder="Filtrar servicios por nombre, DNI o legajo..."
-                    placeholderTextColor="#8A99AB"
-                    value={busquedaTexto}
-                    onChangeText={setBusquedaTexto}
-                    clearButtonMode="while-editing"
-                    autoCorrect={false}
-                  />
-                  {busquedaTexto.length > 0 && (
-                    <TouchableOpacity onPress={() => setBusquedaTexto('')} style={styles.limpiarBusquedaBtn}>
-                      <Icono nombre="close-circle" tamano={20} color="#5B6B80" />
-                    </TouchableOpacity>
-                  )}
-                </View>
-
                 <View style={styles.barraResumenFiltro}>
                   <Text style={styles.textoResumenFiltro}>
                     Mostrando {alumnosFiltrados.length} {alumnosFiltrados.length === 1 ? 'alumno' : 'alumnos'}{' '}
                     {alumnosFiltrados.length !== alumnos.length ? `(de ${alumnos.length} sincronizados)` : 'sincronizados'}
                   </Text>
-                  {(alumnoFiltroLegajo !== null || busquedaTexto.length > 0) && (
+                  {alumnoFiltroLegajo !== null && (
                     <TouchableOpacity
                       onPress={() => {
                         setAlumnoFiltroLegajo(null);
-                        setBusquedaTexto('');
                       }}
                     >
                       <Text style={styles.enlaceRestablecerFiltros}>Ver todos</Text>
@@ -287,7 +217,6 @@ export default function OfflineScreen() {
                     style={styles.botonVerTodosVacio}
                     onPress={() => {
                       setAlumnoFiltroLegajo(null);
-                      setBusquedaTexto('');
                     }}
                   >
                     <Text style={styles.botonVerTodosVacioTexto}>Mostrar todos los alumnos</Text>
@@ -424,55 +353,11 @@ const styles = StyleSheet.create({
     color: '#3A4D66',
     fontSize: 15,
   },
-  barraSync: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottomWidth: 1,
-    borderBottomColor: '#DCE5F0',
-  },
-  syncInfo: {
-    flex: 1,
-  },
-  syncEtiqueta: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#5B6B80',
-    letterSpacing: 0.5,
-  },
-  syncFecha: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#0F2A4D',
-    marginTop: 2,
-  },
-  botonSync: {
-    backgroundColor: '#0B4DA8',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  botonSyncDeshabilitado: {
-    opacity: 0.6,
-  },
-  botonSyncTexto: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
-  },
   banner: {
     margin: 14,
     marginBottom: 4,
     padding: 12,
     borderRadius: 8,
-  },
-  bannerExito: {
-    backgroundColor: '#F1F8E8',
-    borderLeftWidth: 4,
-    borderLeftColor: '#3F6B14',
   },
   bannerAlerta: {
     backgroundColor: '#FFFBEB',
@@ -487,9 +372,6 @@ const styles = StyleSheet.create({
   bannerTexto: {
     fontSize: 13,
     fontWeight: '500',
-  },
-  bannerTextoExito: {
-    color: '#3F6B14',
   },
   bannerTextoAlerta: {
     color: '#B45309',
@@ -622,33 +504,6 @@ const styles = StyleSheet.create({
   },
   contenedorFiltrosOffline: {
     marginBottom: 10,
-  },
-  buscadorDirectoCaja: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: '#DCE5F0',
-    height: 42,
-    marginTop: 6,
-  },
-  buscadorDirectoLupa: {
-    fontSize: 15,
-    marginRight: 8,
-  },
-  buscadorDirectoInput: {
-    flex: 1,
-    fontSize: 13,
-    color: '#0F2A4D',
-  },
-  limpiarBusquedaBtn: {
-    padding: 4,
-  },
-  limpiarBusquedaBtnTexto: {
-    color: '#8A99AB',
-    fontSize: 13,
   },
   barraResumenFiltro: {
     flexDirection: 'row',
