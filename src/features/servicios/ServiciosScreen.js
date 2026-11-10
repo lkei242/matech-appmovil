@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useAuth } from '../../auth/AuthContext';
-import { EncabezadoPantalla, Icono } from '../../components/ui';
+import { Icono } from '../../components/ui';
 import SelectorAlumno from '../../components/SelectorAlumno';
 import {
   actualizarComedor,
@@ -24,7 +24,7 @@ import {
   inscribirDeporte,
 } from './serviciosApi';
 
-export default function ServiciosScreen({ navigation, route }) {
+export default function ServiciosScreen({ route }) {
   const paramLegajo = route?.params?.legajo || null;
   const { sesion } = useAuth();
   const token = sesion?.access;
@@ -259,12 +259,6 @@ export default function ServiciosScreen({ navigation, route }) {
 
   return (
     <View style={styles.contenedor}>
-      <EncabezadoPantalla
-        titulo="Servicios Escolares"
-        subtitulo="Deportes, Transporte y Comedor"
-        onVolver={() => navigation.goBack()}
-      />
-
       {/* Banner de mensaje temporal */}
       {mensajeEstado && (
         <View

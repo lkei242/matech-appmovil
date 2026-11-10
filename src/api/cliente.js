@@ -83,3 +83,17 @@ export async function peticionProtegida(ruta, opciones = {}) {
 
   return enviar(ruta, opciones, sesionActual.access);
 }
+
+// Igual que peticionProtegida, pero nunca lanza: si no hay red devuelve { ok: false, status: 0 }.
+// Lo usan las pantallas de perfil, servicios y consulta offline, que miran `resp.ok` en vez de usar try/catch.
+export async function peticionProtegidaSegura(ruta, opciones = {}) {
+  try {
+    return await peticionProtegida(ruta, opciones);
+  } catch {
+    return {
+      ok: false,
+      status: 0,
+      datos: { error: 'No se pudo conectar con el servidor. Verifique la conexión a la API.' },
+    };
+  }
+}

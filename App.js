@@ -30,13 +30,16 @@ const ENCABEZADO_AZUL = {
   contentStyle: { backgroundColor: colores.fondo },
 };
 
-// Pantallas de pagos: usan la barra de título del navegador.
+// Pantallas internas: todas usan la misma barra de título azul del navegador (con el botón de volver).
 // Qué módulos ve cada rol se decide en src/navigation/modulos.js.
 const PANTALLAS_PAGOS = [
   { name: 'Cuotas', component: CuotasScreen, title: 'Cuotas y deuda' },
   { name: 'Pagar', component: PagarScreen, title: 'Pagar' },
   { name: 'Comprobante', component: ComprobanteScreen, title: 'Cargar comprobante' },
   { name: 'Facturas', component: FacturasScreen, title: 'Facturas y comprobantes' },
+  { name: 'Servicios', component: ServiciosScreen, title: 'Servicios Escolares' },
+  { name: 'Perfil', component: PerfilScreen, title: 'Mi Perfil' },
+  { name: 'Offline', component: OfflineScreen, title: 'Consulta Offline' },
 ];
 
 function Pantallas() {
@@ -69,9 +72,6 @@ function Pantallas() {
                 options={{ ...ENCABEZADO_AZUL, title: pantalla.title }}
               />
             ))}
-            <Stack.Screen name="Servicios" component={ServiciosScreen} />
-            <Stack.Screen name="Perfil" component={PerfilScreen} />
-            <Stack.Screen name="Offline" component={OfflineScreen} />
           </>
         ) : (
           <Stack.Screen name="Login" component={LoginScreen} />

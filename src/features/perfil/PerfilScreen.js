@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 import { useAuth } from '../../auth/AuthContext';
 import { getPerfil, updatePerfil } from './perfilApi';
-import { EncabezadoPantalla } from '../../components/ui';
 
 const ROLES_ETIQUETAS = {
   padre: 'Tutor (Padre/Madre)',
@@ -24,7 +23,7 @@ const ROLES_ETIQUETAS = {
   preceptor: 'Preceptor',
 };
 
-export default function PerfilScreen({ navigation }) {
+export default function PerfilScreen() {
   const { sesion } = useAuth();
   const token = sesion?.access;
 
@@ -138,12 +137,6 @@ export default function PerfilScreen({ navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       style={styles.contenedor}
     >
-      <EncabezadoPantalla
-        titulo="Mi Perfil"
-        subtitulo="Datos de la cuenta y contacto"
-        onVolver={() => navigation.goBack()}
-      />
-
       <ScrollView
         contentContainerStyle={styles.scrollContenido}
         refreshControl={<RefreshControl refreshing={refrescando} onRefresh={onRefresh} colors={['#0B4DA8']} />}

@@ -8,9 +8,7 @@ import SelectorAlumno from '../../components/SelectorAlumno';
 import { Aviso, Boton, Campo, Insignia, Pantalla, Tarjeta } from '../../components/ui';
 import { colores } from '../../theme';
 import { listarAlumnos, listarFacturas, mensajeDeError } from '../../api/pagos';
-import { formatoFecha, formatoMoneda } from '../../utils/formato';
-
-const PATRON_FECHA = /^\d{4}-\d{2}-\d{2}$/;
+import { fechaValida, formatoFecha, formatoFechaEscrita, formatoMoneda } from '../../utils/formato';
 
 export default function FacturasScreen({ route }) {
   const paramLegajo = route?.params?.legajo || null;
@@ -45,8 +43,8 @@ export default function FacturasScreen({ route }) {
 
   async function buscar() {
     setError('');
-    if ((desde && !PATRON_FECHA.test(desde)) || (hasta && !PATRON_FECHA.test(hasta))) {
-      setError('Las fechas deben tener el formato AAAA-MM-DD.');
+    if ((desde && !fechaValida(desde)) || (hasta && !fechaValida(hasta))) {
+      setError('Ingresá fechas válidas con el formato AAAA-MM-DD (por ejemplo, 2026-11-10).');
       return;
     }
     if (desde && hasta && desde > hasta) {
@@ -66,6 +64,12 @@ export default function FacturasScreen({ route }) {
     }
   }
 
+  // Al elegir un alumno se listan sus facturas enseguida (sin filtro de fechas); después se puede filtrar por período.
+  useEffect(() => {
+    if (legajo && alumnos.length > 0) buscar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [legajo, alumnos.length]);
+
   if (estado === 'cargando' && alumnos.length === 0) return <EstadoCargando />;
   if (estado === 'error' && alumnos.length === 0) return <EstadoError mensaje={error} />;
   if (alumnos.length === 0) return <EstadoVacio mensaje="No hay alumnos asociados a tu cuenta." />;
@@ -76,8 +80,20 @@ export default function FacturasScreen({ route }) {
 
       <Tarjeta>
         <Text style={styles.etiqueta}>Período (opcional)</Text>
-        <Campo value={desde} onChangeText={setDesde} placeholder="Desde: AAAA-MM-DD" autoCapitalize="none" />
-        <Campo value={hasta} onChangeText={setHasta} placeholder="Hasta: AAAA-MM-DD" autoCapitalize="none" />
+        <Campo
+          value={desde}
+          onChangeText={(texto) => setDesde(formatoFechaEscrita(texto))}
+          placeholder="Desde: AAAA-MM-DD"
+          keyboardType="number-pad"
+          maxLength={10}
+        />
+        <Campo
+          value={hasta}
+          onChangeText={(texto) => setHasta(formatoFechaEscrita(texto))}
+          placeholder="Hasta: AAAA-MM-DD"
+          keyboardType="number-pad"
+          maxLength={10}
+        />
         <Boton texto="Buscar" icono="search" onPress={buscar} deshabilitado={!legajo} />
         {error ? <Aviso texto={error} tono="rosa" /> : null}
       </Tarjeta>

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiAutenticada } from '../../api';
+import { peticionProtegidaSegura } from '../../api/cliente';
 
 const PREFIJO_CLAVE = 'matech_offline_';
 
@@ -53,7 +53,8 @@ export async function sincronizarDatosOffline(token, username) {
   }
 
   try {
-    const resp = await apiAutenticada('servicios/offline-bundle/', { method: 'GET' }, token);
+    // El cliente con renovación de sesión usa el token de la sesión y lo renueva si venció.
+    const resp = await peticionProtegidaSegura('servicios/offline-bundle/', { method: 'GET' });
     if (resp.ok && resp.datos) {
       await guardarCopiaOffline(username, resp.datos);
       return { ok: true, datos: resp.datos };

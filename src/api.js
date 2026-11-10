@@ -107,3 +107,11 @@ export async function apiRecuperarContrasena(correo) {
     body: JSON.stringify({ correo }),
   });
 }
+
+// Segundo paso de la recuperación: `token` es el código que llega por correo y `nueva` la contraseña nueva.
+export async function apiConfirmarRecuperacion(token, nueva) {
+  return peticion('recuperar-contrasena/confirmar/', {
+    method: 'POST',
+    body: JSON.stringify({ token, nueva }),
+  });
+}

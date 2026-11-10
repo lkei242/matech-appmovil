@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 
 import { useAuth } from '../auth/AuthContext';
-import { apiRecuperarContrasena } from '../api';
+import { apiConfirmarRecuperacion, apiRecuperarContrasena } from '../api';
 import { Aviso, Boton, FranjaLogo, Icono } from '../components/ui';
 import { colores, radio } from '../theme';
 
@@ -23,8 +23,12 @@ export default function LoginScreen() {
   const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
   const [verPassword, setVerPassword] = useState(false);
-  const [recuperando, setRecuperando] = useState(false);
+  // 'login' | 'recuperar' (pide el correo) | 'confirmar' (código del correo + contraseña nueva)
+  const [modo, setModo] = useState('login');
   const [correo, setCorreo] = useState('');
+  const [codigo, setCodigo] = useState('');
+  const [nueva, setNueva] = useState('');
+  const [repetida, setRepetida] = useState('');
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState('');
   const [mensaje, setMensaje] = useState('');
@@ -58,7 +62,7 @@ export default function LoginScreen() {
       const resp = await apiRecuperarContrasena(correo.trim());
       if (resp.ok) {
         setMensaje(resp.datos && resp.datos.mensaje ? resp.datos.mensaje : 'Revisá tu correo.');
-        setRecuperando(false);
+        setModo('confirmar');
       } else {
         setError((resp.datos && resp.datos.error) || 'No se pudo recuperar la contraseña.');
       }
@@ -67,6 +71,49 @@ export default function LoginScreen() {
     } finally {
       setCargando(false);
     }
+  }
+
+  async function confirmar() {
+    setError('');
+    setMensaje('');
+    if (!codigo.trim()) {
+      setError('Pegá el código que te llegó por correo.');
+      return;
+    }
+    if (!nueva) {
+      setError('Ingresá la contraseña nueva.');
+      return;
+    }
+    if (nueva !== repetida) {
+      setError('Las contraseñas no coinciden.');
+      return;
+    }
+    setCargando(true);
+    try {
+      const resp = await apiConfirmarRecuperacion(codigo.trim(), nueva);
+      if (resp.ok) {
+        setMensaje(
+          resp.datos && resp.datos.mensaje ? resp.datos.mensaje : 'Contraseña actualizada. Ya podés iniciar sesión.',
+        );
+        setCodigo('');
+        setNueva('');
+        setRepetida('');
+        setPassword('');
+        setModo('login');
+      } else {
+        setError((resp.datos && resp.datos.error) || 'No se pudo cambiar la contraseña.');
+      }
+    } catch {
+      setError('No se pudo conectar con el servidor.');
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  function irA(destino) {
+    setError('');
+    setMensaje('');
+    setModo(destino);
   }
 
   return (
@@ -85,14 +132,18 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.caja}>
-          <Text style={styles.cajaTitulo}>{recuperando ? 'Recuperar contraseña' : 'Iniciar sesión'}</Text>
+          <Text style={styles.cajaTitulo}>
+            {modo === 'login' ? 'Iniciar sesión' : modo === 'recuperar' ? 'Recuperar contraseña' : 'Nueva contraseña'}
+          </Text>
           <Text style={styles.cajaDesc}>
-            {recuperando
-              ? 'Ingresá tu correo y te enviamos las instrucciones.'
-              : 'Ingresá con tu usuario y contraseña.'}
+            {modo === 'login'
+              ? 'Ingresá con tu usuario y contraseña.'
+              : modo === 'recuperar'
+                ? 'Ingresá tu correo y te enviamos un código para cambiarla.'
+                : 'Pegá el código que te llegó por correo y elegí una contraseña nueva.'}
           </Text>
 
-          {!recuperando ? (
+          {modo === 'login' ? (
             <>
               <View style={styles.campo}>
                 <Icono nombre="person-outline" tamano={20} color={colores.suave} />
@@ -131,11 +182,11 @@ export default function LoginScreen() {
               </View>
 
               <Boton texto="Ingresar" onPress={ingresar} cargando={cargando} estilo={styles.boton} />
-              <Pressable onPress={() => setRecuperando(true)} accessibilityRole="button">
+              <Pressable onPress={() => irA('recuperar')} accessibilityRole="button">
                 <Text style={styles.enlace}>¿Olvidaste tu contraseña?</Text>
               </Pressable>
             </>
-          ) : (
+          ) : modo === 'recuperar' ? (
             <>
               <View style={styles.campo}>
                 <Icono nombre="mail-outline" tamano={20} color={colores.suave} />
@@ -150,8 +201,69 @@ export default function LoginScreen() {
                   accessibilityLabel="Correo electrónico"
                 />
               </View>
-              <Boton texto="Recuperar contraseña" onPress={recuperar} cargando={cargando} estilo={styles.boton} />
-              <Pressable onPress={() => setRecuperando(false)} accessibilityRole="button">
+              <Boton texto="Enviar código" onPress={recuperar} cargando={cargando} estilo={styles.boton} />
+              <Pressable onPress={() => irA('confirmar')} accessibilityRole="button">
+                <Text style={styles.enlace}>Ya tengo un código</Text>
+              </Pressable>
+              <Pressable onPress={() => irA('login')} accessibilityRole="button">
+                <Text style={styles.enlace}>Volver al inicio de sesión</Text>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <View style={styles.campo}>
+                <Icono nombre="key-outline" tamano={20} color={colores.suave} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Código del correo"
+                  placeholderTextColor="#8A99AB"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  value={codigo}
+                  onChangeText={setCodigo}
+                  accessibilityLabel="Código del correo"
+                />
+              </View>
+              <View style={styles.campo}>
+                <Icono nombre="lock-closed-outline" tamano={20} color={colores.suave} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Contraseña nueva"
+                  placeholderTextColor="#8A99AB"
+                  secureTextEntry={!verPassword}
+                  autoCapitalize="none"
+                  value={nueva}
+                  onChangeText={setNueva}
+                  accessibilityLabel="Contraseña nueva"
+                />
+                <Pressable
+                  onPress={() => setVerPassword((v) => !v)}
+                  hitSlop={10}
+                  accessibilityRole="button"
+                  accessibilityLabel={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  <Icono nombre={verPassword ? 'eye-off-outline' : 'eye-outline'} tamano={20} color={colores.suave} />
+                </Pressable>
+              </View>
+              <View style={styles.campo}>
+                <Icono nombre="lock-closed-outline" tamano={20} color={colores.suave} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Repetir contraseña nueva"
+                  placeholderTextColor="#8A99AB"
+                  secureTextEntry={!verPassword}
+                  autoCapitalize="none"
+                  value={repetida}
+                  onChangeText={setRepetida}
+                  onSubmitEditing={confirmar}
+                  accessibilityLabel="Repetir contraseña nueva"
+                />
+              </View>
+              <Boton texto="Cambiar contraseña" onPress={confirmar} cargando={cargando} estilo={styles.boton} />
+              <Pressable onPress={() => irA('recuperar')} accessibilityRole="button">
+                <Text style={styles.enlace}>Pedir un código nuevo</Text>
+              </Pressable>
+              <Pressable onPress={() => irA('login')} accessibilityRole="button">
                 <Text style={styles.enlace}>Volver al inicio de sesión</Text>
               </Pressable>
             </>

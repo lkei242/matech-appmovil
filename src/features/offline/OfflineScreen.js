@@ -12,7 +12,7 @@ import {
 import SelectorAlumno from '../../components/SelectorAlumno';
 import { useAuth } from '../../auth/AuthContext';
 import { obtenerCopiaOffline, sincronizarDatosOffline } from './offlineStorage';
-import { EncabezadoPantalla, Icono } from '../../components/ui';
+import { Icono } from '../../components/ui';
 
 function formatearFechaHora(isoString) {
   if (!isoString) return 'Nunca sincronizado';
@@ -29,7 +29,7 @@ function formatearFechaHora(isoString) {
   }
 }
 
-export default function OfflineScreen({ navigation }) {
+export default function OfflineScreen() {
   const { sesion } = useAuth();
   const username = sesion?.usuario;
   const token = sesion?.access;
@@ -137,12 +137,6 @@ export default function OfflineScreen({ navigation }) {
 
   return (
     <View style={styles.contenedor}>
-      <EncabezadoPantalla
-        titulo="Consulta Offline"
-        subtitulo="Datos disponibles sin conexión"
-        onVolver={() => navigation.goBack()}
-      />
-
       {/* Barra de estado de sincronización */}
       <View style={styles.barraSync}>
         <View style={styles.syncInfo}>
