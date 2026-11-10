@@ -5,7 +5,7 @@
 //   refresh token y reintenta la petición.
 // - Si la renovación falla, avisa a la app para que cierre la sesión.
 
-import { API_BASE_URL } from '../api.js';
+import { API_BASE_URL, fetchConLimite } from '../api.js';
 
 let sesionActual = null;
 let callbacks = { onRenovada: () => {}, onExpirada: () => {} };
@@ -24,14 +24,20 @@ export function fijarSesion(sesion) {
 async function enviar(ruta, opciones, token) {
   // Solo los cuerpos JSON llevan Content-Type; los FormData (archivos) lo arman fetch solo.
   const esJson = typeof (opciones && opciones.body) === 'string';
-  const resp = await fetch(`${API_BASE_URL}${ruta}`, {
-    ...opciones,
-    headers: {
-      ...(esJson ? { 'Content-Type': 'application/json' } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(opciones && opciones.headers),
+  // Los archivos (FormData) pueden tardar más en subirse que una consulta común.
+  const limite = opciones && opciones.body instanceof FormData ? 60000 : 20000;
+  const resp = await fetchConLimite(
+    `${API_BASE_URL}${ruta}`,
+    {
+      ...opciones,
+      headers: {
+        ...(esJson ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(opciones && opciones.headers),
+      },
     },
-  });
+    limite,
+  );
 
   let datos = null;
   try {

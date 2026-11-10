@@ -3,7 +3,11 @@ import { Platform, NativeModules } from 'react-native';
 // Detectar automáticamente la IP de la PC (servidor Metro de Expo) en el celular
 function getDevServerIp() {
   try {
-    const scriptURL = NativeModules?.SourceCode?.scriptURL;
+    // En la arquitectura nueva de React Native, la URL del bundle se lee con getConstants();
+    // la propiedad directa `scriptURL` puede no existir. Se prueban las dos formas.
+    const codigoFuente = NativeModules?.SourceCode;
+    const scriptURL =
+      (codigoFuente?.getConstants ? codigoFuente.getConstants().scriptURL : null) || codigoFuente?.scriptURL;
     if (scriptURL) {
       const address = scriptURL.split('://')[1]?.split('/')[0];
       const host = address?.split(':')[0];
@@ -30,9 +34,16 @@ export const API_BASE_URL = DETECTED_URL || Platform.select({
   default: 'http://localhost:8000/api/',
 });
 
+// fetch con tiempo máximo de espera: si el servidor no responde, falla en vez de quedar colgado.
+export function fetchConLimite(url, opciones = {}, milisegundos = 15000) {
+  const controlador = new AbortController();
+  const temporizador = setTimeout(() => controlador.abort(), milisegundos);
+  return fetch(url, { ...opciones, signal: controlador.signal }).finally(() => clearTimeout(temporizador));
+}
+
 async function peticion(ruta, opciones) {
   try {
-    const resp = await fetch(`${API_BASE_URL}${ruta}`, {
+    const resp = await fetchConLimite(`${API_BASE_URL}${ruta}`, {
       headers: { 'Content-Type': 'application/json' },
       ...opciones,
     });
@@ -49,7 +60,9 @@ async function peticion(ruta, opciones) {
     return {
       ok: false,
       status: 0,
-      datos: { error: 'No se pudo conectar con el servidor. Verifique su red local o conexión a internet.' },
+      datos: {
+        error: `No se pudo conectar con el servidor (${API_BASE_URL}). Verifique que el backend esté encendido y que el celular esté en la misma red.`,
+      },
     };
   }
 }
@@ -64,7 +77,7 @@ export async function apiAutenticada(ruta, opciones = {}, token = null) {
   }
 
   try {
-    const resp = await fetch(`${API_BASE_URL}${ruta}`, {
+    const resp = await fetchConLimite(`${API_BASE_URL}${ruta}`, {
       ...opciones,
       headers,
     });

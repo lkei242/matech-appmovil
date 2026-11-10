@@ -70,20 +70,23 @@ export function AuthProvider({ children }) {
     return nueva;
   }
 
+  // La sesión se cierra en el celular al instante. Avisarle al servidor (para invalidar el refresh token)
+  // se hace en segundo plano: si no hay red, el usuario no debe quedar esperando.
   async function logout() {
-    if (sesion) {
-      try {
-        await apiLogout(sesion.refresh);
-      } catch {}
-      try {
-        if (sesion.usuario) {
-          await limpiarCopiaOffline(sesion.usuario);
-        }
-      } catch {}
-      await AsyncStorage.removeItem(CLAVE_SESION);
-    }
+    const previa = sesion;
     fijarSesion(null);
     setSesion(null);
+    if (!previa) return;
+
+    try {
+      await AsyncStorage.removeItem(CLAVE_SESION);
+    } catch {}
+    try {
+      if (previa.usuario) {
+        await limpiarCopiaOffline(previa.usuario);
+      }
+    } catch {}
+    apiLogout(previa.refresh).catch(() => {});
   }
 
   return (
