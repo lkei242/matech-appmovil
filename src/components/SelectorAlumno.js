@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useAuth } from '../auth/AuthContext';
 import { Icono } from './ui';
 
 export default function SelectorAlumno({
@@ -26,6 +27,7 @@ export default function SelectorAlumno({
   onSeleccionar,
   permitirTodos = false,
 }) {
+  const rol = useAuth()?.sesion?.rol;
   const [modalVisible, setModalVisible] = useState(false);
   const [busqueda, setBusqueda] = useState('');
   const [filtroNivel, setFiltroNivel] = useState('Todos');
@@ -84,6 +86,11 @@ export default function SelectorAlumno({
 
   if (!alumnos || alumnos.length === 0) return null;
 
+  // Con un solo alumno no hay nada que elegir ni que buscar. Un alumno solo se ve a sí mismo,
+  // así que ni siquiera se muestra la ficha; un tutor con un solo hijo conserva el nombre como referencia.
+  const soloUno = alumnos.length === 1 && !permitirTodos;
+  if (soloUno && rol === 'alumno') return null;
+
   const seleccionarYcerrar = (legajo) => {
     onSeleccionar(legajo);
     setModalVisible(false);
@@ -131,13 +138,15 @@ export default function SelectorAlumno({
               );
             })}
           </ScrollView>
-          <TouchableOpacity
-            style={styles.botonLupaMini}
-            onPress={() => setModalVisible(true)}
-            accessibilityLabel="Buscar alumno"
-          >
-            <Icono nombre="search-outline" tamano={20} color="#0B4DA8" />
-          </TouchableOpacity>
+          {!soloUno && (
+            <TouchableOpacity
+              style={styles.botonLupaMini}
+              onPress={() => setModalVisible(true)}
+              accessibilityLabel="Buscar alumno"
+            >
+              <Icono nombre="search-outline" tamano={20} color="#0B4DA8" />
+            </TouchableOpacity>
+          )}
         </View>
       ) : (
         // Para listas largas (personal escolar), mostramos ficha del alumno activo + botón de búsqueda
